@@ -5,9 +5,9 @@ import uniqid from "uniqid";
 
 class CommandManager implements Types.CommandManagerInterface {
 
-    private commands: Types.CommandInterface[] = [];
+    private commands: Types.Command[] = [];
 
-    add(command: Types.CommandInterface) {
+    add(command: Types.Command) {
         this.commands.push(command);
     }
 
@@ -16,16 +16,16 @@ class CommandManager implements Types.CommandManagerInterface {
         this.commands.splice(idx, 1);
     }
 
-    async eventHandler(event: Types.UtilEvent, args: Types.UtilArgs, datastore: Types.DatastoreInterface) {
+    async eventHandler(event: Types.UtilEvent, args: Types.UtilArgs, database: Types.Database) {
 
-        const eventList = await datastore.find({
+        const eventList = await database.find({
             type: "listener",
             event: event.toString()
         });
 
         eventList.forEach(e => {
             const command = this.commands.find(cmd => e.session.startsWith(cmd.id));
-            command?.event(event, args, new Util(command.id, e.session, datastore));
+            command?.event(event, args, new Util(command.id, e.session, database));
         });
 
         let sessions: Types.CommandSession[] = [];
@@ -33,7 +33,7 @@ class CommandManager implements Types.CommandManagerInterface {
             sessions.push(uniqid(`${this.commands[i].id}-`));
         }
 
-        const promises = this.commands.map((cmd, idx) => cmd.validate(event, args, new Util(cmd.id, sessions[idx], datastore)));
+        const promises = this.commands.map((cmd, idx) => cmd.validate(event, args, new Util(cmd.id, sessions[idx], database)));
         const resolved = await Promise.all(promises);
         const executed: Types.CommandID[] = [];
 
@@ -41,7 +41,7 @@ class CommandManager implements Types.CommandManagerInterface {
             if (res == true) {
                 const command = this.commands[idx];
                 executed.push(command.id);
-                command.execute(event, args, new Util(command.id, sessions[idx], datastore));
+                command.execute(event, args, new Util(command.id, sessions[idx], database));
             }
         });
 

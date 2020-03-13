@@ -1,14 +1,14 @@
 
 import * as Types from "../index";
 
-const Util: Types.UtilConstructor = class Util implements Types.UtilInterface {
+class Util implements Types.UtilInterface {
 
-    private state: Types.DatastoreData;
+    private state: Types.DatabaseData;
 
     constructor(
         public id: Types.CommandID,
         public session: Types.CommandSession,
-        public datastore: Types.DatastoreInterface,
+        public database: Types.Database,
     ) {
         this.state = {
             type: "commandstate",
@@ -16,33 +16,33 @@ const Util: Types.UtilConstructor = class Util implements Types.UtilInterface {
         };
     }
 
-    getStateProperty(property: Types.DatastoreDataProperty) { return this.state[property]; }
-    setStateProperty(property: Types.DatastoreDataProperty, value: Types.DatastoreDataValue) { this.state[property] = value; }
-    deleteStateProperty(property: Types.DatastoreDataProperty) { delete this.state[property]; }
+    getStateProperty(property: Types.DatabaseDataProperty) { return this.state[property]; }
+    setStateProperty(property: Types.DatabaseDataProperty, value: Types.DatabaseDataValue) { this.state[property] = value; }
+    deleteStateProperty(property: Types.DatabaseDataProperty) { delete this.state[property]; }
 
     async loadState() {
-        this.state = await this.datastore.findOne({
+        this.state = (await this.database.findOne({
             type: "commandstate",
             session: this.session
-        });
+        })) || {};
     }
 
     saveState() {
-        return this.datastore.update({
+        return this.database.update({
             type: "commandstate",
             session: this.session
         }, this.state);
     }
 
     deleteState() {
-        return this.datastore.delete({
+        return this.database.delete({
             type: "commandstate",
             session: this.session
         });
     }
 
     addListener(event: Types.UtilEvent) {
-        return this.datastore.insert({
+        return this.database.insert({
             type: `listener`,
             session: this.session,
             event: event.toString()
@@ -50,7 +50,7 @@ const Util: Types.UtilConstructor = class Util implements Types.UtilInterface {
     }
 
     removeListener(event: Types.UtilEvent) {
-        return this.datastore.delete({
+        return this.database.delete({
             type: `listener`,
             session: this.session,
             event: event.toString()
@@ -58,7 +58,7 @@ const Util: Types.UtilConstructor = class Util implements Types.UtilInterface {
     }
 
     removeAllListeners() {
-        return this.datastore.delete({
+        return this.database.delete({
             type: `listener`,
             session: this.session
         });

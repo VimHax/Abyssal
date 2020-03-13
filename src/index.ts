@@ -2,7 +2,7 @@
 import DiscordJS from "discord.js";
 import EventEmitter from "events";
 
-import Datastore from "./Classes/Datastore";
+import Database from "./Classes/Database";
 import Util from "./Classes/Util";
 import Command from "./Classes/Command";
 import CommandManager from "./Classes/CommandManager";
@@ -10,22 +10,21 @@ import Task from "./Classes/Task";
 import TaskManager from "./Classes/TaskManager";
 import Client from "./Classes/Client";
 
-// Datastore //
+// Database //
 
-export type DatastoreID = string;
-export type DatastoreDataValue = any;
-export type DatastoreDataProperty = string;
-export type DatastoreData = {
-    [key: string]: DatastoreDataValue;
+export type DatabaseDataValue = any;
+export type DatabaseDataProperty = string;
+export type DatabaseData = {
+    [key: string]: DatabaseDataValue;
 };
 
-export interface DatastoreInterface {
+export interface DatabaseInterface {
     initialize: () => Promise<void>;
-    find: (query: DatastoreData) => Promise<DatastoreData[]>;
-    findOne: (query: DatastoreData) => Promise<DatastoreData>;
-    update: (query: DatastoreData, data: DatastoreData) => Promise<void>;
-    insert: (data: DatastoreData) => Promise<void>;
-    delete: (query: DatastoreData) => Promise<void>;
+    find: (query: DatabaseData) => Promise<DatabaseData[]>;
+    findOne: (query: DatabaseData) => Promise<DatabaseData | undefined>;
+    update: (query: DatabaseData, data: DatabaseData) => Promise<void>;
+    insert: (data: DatabaseData) => Promise<void>;
+    delete: (query: DatabaseData) => Promise<void>;
 }
 
 // Util //
@@ -38,10 +37,10 @@ export type UtilEvent = string | symbol;
 export interface UtilInterface {
     id: CommandID;
     session: CommandSession;
-    datastore: DatastoreInterface;
-    getStateProperty: (property: DatastoreDataProperty) => DatastoreDataValue;
-    setStateProperty: (property: DatastoreDataProperty, value: DatastoreDataValue) => void;
-    deleteStateProperty: (property: DatastoreDataProperty) => void;
+    database: Database;
+    getStateProperty: (property: DatabaseDataProperty) => DatabaseDataValue | undefined;
+    setStateProperty: (property: DatabaseDataProperty, value: DatabaseDataValue) => void;
+    deleteStateProperty: (property: DatabaseDataProperty) => void;
     loadState: () => Promise<void>;
     saveState: () => Promise<void>;
     deleteState: () => Promise<void>;
@@ -50,72 +49,62 @@ export interface UtilInterface {
     removeAllListeners: () => Promise<void>;
 }
 
-export interface UtilConstructor {
-    new(id: CommandID, session: CommandSession, datastore: DatastoreInterface): UtilInterface;
-}
-
 // Command //
 
-export type CommandExecute = (event: UtilEvent, args: UtilArgs, util: UtilInterface) => Promise<void>;
-export type CommandValidator = (event: UtilEvent, args: UtilArgs, util: UtilInterface) => Promise<boolean>;
+export type CommandExecutor = (event: UtilEvent, args: UtilArgs, util: Util) => Promise<void>;
+export type CommandValidator = (event: UtilEvent, args: UtilArgs, util: Util) => Promise<boolean>;
 
 export interface CommandInterface extends EventEmitter.EventEmitter {
     id: CommandID;
     events: UtilEvent[];
-    execute: CommandExecute
+    eventListeners: UtilEvent[];
+    execute: CommandExecutor
     validate: CommandValidator;
-    event: (event: UtilEvent, args: UtilArgs, util: UtilInterface) => void;
-    on: (event: UtilEvent, listener: (args: UtilArgs, util: UtilInterface) => void) => this;
+    event: (event: UtilEvent, args: UtilArgs, util: Util) => void;
+    on: (event: UtilEvent, listener: (args: UtilArgs, util: Util) => void) => this;
 }
 
 export interface CommandConfig {
     id: CommandID,
     events: UtilEvent[],
-    execute: CommandExecute,
+    eventListeners: UtilEvent[],
+    execute: CommandExecutor,
     validator: CommandValidator
-}
-
-export interface CommandConstructor {
-    new(config: CommandConfig): CommandInterface;
 }
 
 // Command-Manager //
 
 export interface CommandManagerInterface {
-    add: (command: CommandInterface) => void;
+    add: (command: Command) => void;
     remove: (id: CommandID) => void;
-    eventHandler: (event: UtilEvent, args: UtilArgs, datastore: DatastoreInterface) => Promise<CommandID[]>;
+    eventHandler: (event: UtilEvent, args: UtilArgs, database: Database) => Promise<CommandID[]>;
 }
 
 // Task //
 
 export type TaskID = string;
-export type TaskExecute = (event: UtilEvent, args: UtilArgs, commands: CommandID[], datastore: DatastoreInterface) => Promise<void>;
+export type TaskExecutor = (event: UtilEvent, args: UtilArgs, commands: CommandID[], database: Database) => Promise<void>;
 
 export interface TaskInterface {
     id: TaskID;
     events: UtilEvent[];
-    execute: TaskExecute;
-}
-
-export interface TaskConstructor {
-    new(id: TaskID, events: UtilEvent[], execute: TaskExecute): TaskInterface;
+    execute: TaskExecutor;
 }
 
 // Task-Manager //
 
 export interface TaskManagerInterface {
-    add: (task: TaskInterface) => void;
+    add: (task: Task) => void;
     remove: (id: TaskID) => void;
-    eventHandler: (event: UtilEvent, args: UtilArgs, commands: CommandID[], datastore: DatastoreInterface) => void;
+    eventHandler: (event: UtilEvent, args: UtilArgs, commands: CommandID[], database: Database) => void;
 }
 
 // Client //
 
 export type ClientConfig = {
-    datastore: DatastoreInterface,
-    commandManager: CommandManagerInterface,
-    taskManager: TaskManagerInterface,
+    database: Database,
+    commandManager: CommandManager,
+    taskManager: TaskManager,
     clientOptions?: DiscordJS.ClientOptions
 };
 
@@ -123,12 +112,8 @@ export interface ClientInterface extends DiscordJS.Client {
     config: ClientConfig;
 }
 
-export interface ClientConstructor {
-    new(config: ClientConfig): ClientInterface;
-}
-
 export {
-    Datastore,
+    Database,
     Util,
     Command,
     CommandManager,

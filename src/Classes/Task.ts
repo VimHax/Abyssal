@@ -1,13 +1,13 @@
 
 import * as Types from "../index";
 
-const Task: Types.TaskConstructor = class Task implements Types.TaskInterface {
+class Task implements Types.TaskInterface {
 
-    public execute: Types.TaskExecute;
+    public execute: Types.TaskExecutor;
     constructor(
         public id: Types.TaskID,
         public events: Types.UtilEvent[],
-        task: Types.TaskExecute
+        task: Types.TaskExecutor
     ) { this.execute = task; }
 
 }

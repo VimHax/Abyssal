@@ -3,9 +3,9 @@ import * as Types from "../index";
 
 class TaskManager implements Types.TaskManagerInterface {
 
-    private tasks: Types.TaskInterface[] = [];
+    private tasks: Types.Task[] = [];
 
-    add(task: Types.TaskInterface) {
+    add(task: Types.Task) {
         this.tasks.push(task);
     }
 
@@ -14,10 +14,10 @@ class TaskManager implements Types.TaskManagerInterface {
         this.tasks.splice(idx, 1);
     }
 
-    async eventHandler(event: Types.UtilEvent, args: Types.UtilArgs, commands: Types.CommandID[], datastore: Types.DatastoreInterface) {
+    async eventHandler(event: Types.UtilEvent, args: Types.UtilArgs, commands: Types.CommandID[], database: Types.Database) {
         this.tasks.forEach(task => {
             if (task.events.includes(event)) {
-                task.execute(event, args, commands, datastore);
+                task.execute(event, args, commands, database);
             }
         });
     }
