@@ -1,6 +1,6 @@
 {
   "name": "abyssal",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "description": "A discord.js framework, serving the purpose of, making your discord bot modular in nature.",
   "main": "./build/index.js",
   "typings": "./build/index.d.ts",
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/VimHax/Abyssal#readme",
   "dependencies": {
-    "discord.js": "github:discordjs/discord.js",
+    "discord.js": "^12.0.2",
     "uniqid": "^5.2.0"
   },
   "devDependencies": {
