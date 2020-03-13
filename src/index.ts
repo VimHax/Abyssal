@@ -36,6 +36,7 @@ export type UtilEvent = string | symbol;
 
 export interface UtilInterface {
     id: CommandID;
+    state: DatabaseData;
     session: CommandSession;
     database: Database;
     getStateProperty: (property: DatabaseDataProperty) => DatabaseDataValue | undefined;

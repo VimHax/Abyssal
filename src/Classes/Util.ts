@@ -3,7 +3,7 @@ import * as Types from "../index";
 
 class Util implements Types.UtilInterface {
 
-    private state: Types.DatabaseData;
+    public state: Types.DatabaseData;
 
     constructor(
         public id: Types.CommandID,
@@ -24,7 +24,10 @@ class Util implements Types.UtilInterface {
         this.state = (await this.database.findOne({
             type: "commandstate",
             session: this.session
-        })) || {};
+        })) || {
+            type: "commandstate",
+            session: this.session
+        };
     }
 
     saveState() {
