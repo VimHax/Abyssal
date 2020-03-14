@@ -4,121 +4,130 @@ import EventEmitter from "events";
 
 import Database from "./Classes/Database";
 import Util from "./Classes/Util";
-import Command from "./Classes/Command";
-import CommandManager from "./Classes/CommandManager";
-import Task from "./Classes/Task";
-import TaskManager from "./Classes/TaskManager";
+import Trigger from "./Classes/Trigger";
+import TriggerManager from "./Classes/TriggerManager";
+import Job from "./Classes/Job";
+import JobManager from "./Classes/JobManager";
 import Client from "./Classes/Client";
 
 // Database //
 
-export type DatabaseDataValue = any;
-export type DatabaseDataProperty = string;
-export type DatabaseData = {
-    [key: string]: DatabaseDataValue;
+export type DocumentValue = any;
+export type DocumentProperty = string;
+export type Document = {
+    [key: string]: DocumentValue;
 };
+
+export type Query = Document;
 
 export interface DatabaseInterface {
     initialize: () => Promise<void>;
-    find: (query: DatabaseData) => Promise<DatabaseData[]>;
-    findOne: (query: DatabaseData) => Promise<DatabaseData | undefined>;
-    update: (query: DatabaseData, data: DatabaseData) => Promise<void>;
-    insert: (data: DatabaseData) => Promise<void>;
-    delete: (query: DatabaseData) => Promise<void>;
+    find: (query: Query) => Promise<Document[]>;
+    findOne: (query: Query) => Promise<Document | undefined>;
+    update: (query: Query, document: Document) => Promise<void>;
+    insert: (document: Document) => Promise<void>;
+    delete: (query: Query) => Promise<void>;
 }
 
 // Util //
 
-export type CommandID = string;
-export type CommandSession = string;
-export type UtilArgs = any[];
-export type UtilEvent = string | symbol;
+export type TriggerID = string;
+export type TriggerSession = string;
+export type Event = string | symbol;
+export type EventArgs = any[];
+export type State = Document;
+export type StateProperty = DocumentProperty;
+export type StateValue = DocumentValue;
 
 export interface UtilInterface {
-    id: CommandID;
-    state: DatabaseData;
-    session: CommandSession;
+    id: TriggerID;
+    state: State;
+    session: TriggerSession;
     database: Database;
-    getStateProperty: (property: DatabaseDataProperty) => DatabaseDataValue | undefined;
-    setStateProperty: (property: DatabaseDataProperty, value: DatabaseDataValue) => void;
-    deleteStateProperty: (property: DatabaseDataProperty) => void;
+    getStateProperty: (property: StateProperty) => StateValue | undefined;
+    setStateProperty: (property: StateProperty, value: StateValue) => void;
+    deleteStateProperty: (property: StateProperty) => void;
     loadState: () => Promise<void>;
     saveState: () => Promise<void>;
     deleteState: () => Promise<void>;
-    addListener: (event: UtilEvent) => Promise<void>;
-    removeListener: (event: UtilEvent) => Promise<void>;
+    addListener: (event: Event) => Promise<void>;
+    removeListener: (event: Event) => Promise<void>;
     removeAllListeners: () => Promise<void>;
 }
 
-// Command //
+// Trigger //
 
-export type CommandExecutor = (event: UtilEvent, args: UtilArgs, util: Util) => Promise<void>;
-export type CommandValidator = (event: UtilEvent, args: UtilArgs, util: Util) => Promise<boolean>;
+export type TriggerExecutor = (event: Event, args: EventArgs, util: Util) => Promise<void>;
+export type TriggerValidator = (event: Event, args: EventArgs, util: Util) => Promise<boolean>;
+export type EventListener = (args: EventArgs, util: Util) => void;
 
-export interface CommandInterface extends EventEmitter.EventEmitter {
-    id: CommandID;
-    events: UtilEvent[];
-    eventListeners: UtilEvent[];
-    execute: CommandExecutor
-    validate: CommandValidator;
-    event: (event: UtilEvent, args: UtilArgs, util: Util) => void;
-    on: (event: UtilEvent, listener: (args: UtilArgs, util: Util) => void) => this;
+export interface TriggerInterface extends EventEmitter.EventEmitter {
+    id: TriggerID;
+    events: Event[];
+    eventListeners: Event[];
+    execute: TriggerExecutor
+    validate: TriggerValidator;
+    eventHandler: (event: Event, args: EventArgs, util: Util) => void;
+    on: (event: Event, listener: EventListener) => this;
 }
 
-export interface CommandConfig {
-    id: CommandID,
-    events: UtilEvent[],
-    eventListeners: UtilEvent[],
-    execute: CommandExecutor,
-    validator: CommandValidator
+export interface TriggerConfig {
+    id: TriggerID,
+    events: Event[],
+    eventListeners: Event[],
+    executor: TriggerExecutor,
+    validator: TriggerValidator
 }
 
-// Command-Manager //
+// Trigger-Manager //
 
-export interface CommandManagerInterface {
-    add: (command: Command) => void;
-    remove: (id: CommandID) => void;
-    eventHandler: (event: UtilEvent, args: UtilArgs, database: Database) => Promise<CommandID[]>;
+export interface TriggerManagerInterface {
+    add: (trigger: Trigger) => void;
+    remove: (id: TriggerID) => void;
+    eventHandler: (event: Event, args: EventArgs, database: Database) => Promise<Trigger[]>;
 }
 
-// Task //
+// Job //
 
-export type TaskID = string;
-export type TaskExecutor = (event: UtilEvent, args: UtilArgs, commands: CommandID[], database: Database) => Promise<void>;
+export type JobID = string;
+export type JobExecutor = (event: Event, args: EventArgs, triggers: Trigger[], database: Database) => Promise<void>;
 
-export interface TaskInterface {
-    id: TaskID;
-    events: UtilEvent[];
-    execute: TaskExecutor;
+export interface JobInterface {
+    id: JobID;
+    events: Event[];
+    execute: JobExecutor;
 }
 
-// Task-Manager //
+// Job-Manager //
 
-export interface TaskManagerInterface {
-    add: (task: Task) => void;
-    remove: (id: TaskID) => void;
-    eventHandler: (event: UtilEvent, args: UtilArgs, commands: CommandID[], database: Database) => void;
+export interface JobManagerInterface {
+    add: (job: Job) => void;
+    remove: (id: JobID) => void;
+    eventHandler: (event: Event, args: EventArgs, triggers: Trigger[], database: Database) => void;
 }
 
 // Client //
 
 export type ClientConfig = {
     database: Database,
-    commandManager: CommandManager,
-    taskManager: TaskManager,
+    triggerManager: TriggerManager,
+    jobManager: JobManager,
     clientOptions?: DiscordJS.ClientOptions
 };
 
 export interface ClientInterface extends DiscordJS.Client {
     config: ClientConfig;
+    database: Database;
+    triggerManager: TriggerManager;
+    clientOptions?: DiscordJS.ClientOptions;
 }
 
 export {
     Database,
     Util,
-    Command,
-    CommandManager,
-    Task,
-    TaskManager,
+    Trigger,
+    TriggerManager,
+    Job,
+    JobManager,
     Client
 }

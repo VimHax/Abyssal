@@ -3,48 +3,48 @@ import * as Types from "../index";
 
 class Util implements Types.UtilInterface {
 
-    public state: Types.DatabaseData;
+    public state: Types.State;
 
     constructor(
-        public id: Types.CommandID,
-        public session: Types.CommandSession,
+        public id: Types.TriggerID,
+        public session: Types.TriggerSession,
         public database: Types.Database,
     ) {
         this.state = {
-            type: "commandstate",
+            type: "triggerstate",
             session: this.session
         };
     }
 
-    getStateProperty(property: Types.DatabaseDataProperty) { return this.state[property]; }
-    setStateProperty(property: Types.DatabaseDataProperty, value: Types.DatabaseDataValue) { this.state[property] = value; }
-    deleteStateProperty(property: Types.DatabaseDataProperty) { delete this.state[property]; }
+    getStateProperty(property: Types.StateProperty) { return this.state[property]; }
+    setStateProperty(property: Types.StateProperty, value: Types.StateValue) { this.state[property] = value; }
+    deleteStateProperty(property: Types.StateProperty) { delete this.state[property]; }
 
     async loadState() {
         this.state = (await this.database.findOne({
-            type: "commandstate",
+            type: "triggerstate",
             session: this.session
         })) || {
-            type: "commandstate",
+            type: "triggerstate",
             session: this.session
         };
     }
 
     saveState() {
         return this.database.update({
-            type: "commandstate",
+            type: "triggerstate",
             session: this.session
         }, this.state);
     }
 
     deleteState() {
         return this.database.delete({
-            type: "commandstate",
+            type: "triggerstate",
             session: this.session
         });
     }
 
-    addListener(event: Types.UtilEvent) {
+    addListener(event: Types.Event) {
         return this.database.insert({
             type: `listener`,
             session: this.session,
@@ -52,7 +52,7 @@ class Util implements Types.UtilInterface {
         })
     }
 
-    removeListener(event: Types.UtilEvent) {
+    removeListener(event: Types.Event) {
         return this.database.delete({
             type: `listener`,
             session: this.session,

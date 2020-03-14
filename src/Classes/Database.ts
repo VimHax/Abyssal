@@ -1,9 +1,9 @@
 
 import * as Types from "../index";
 
-let Data: Types.DatabaseData[] = [];
+let Data: Types.Document[] = [];
 
-function matchQuery(query: Types.DatabaseData, document: Types.DatabaseData): boolean {
+function matchQuery(query: Types.Query, document: Types.Document): boolean {
     const props = Object.keys(query);
     let found = true;
     props.forEach(prop => document[prop] === query[prop] || (found = false));
@@ -13,15 +13,15 @@ function matchQuery(query: Types.DatabaseData, document: Types.DatabaseData): bo
 class Database implements Types.DatabaseInterface {
 
     async initialize() { }
-    async find(query: Types.DatabaseData) { return Data.filter(doc => matchQuery(query, doc)); }
-    async findOne(query: Types.DatabaseData) { return Data.filter(doc => matchQuery(query, doc))[0]; }
-    async update(query: Types.DatabaseData, data: Types.DatabaseData) {
+    async find(query: Types.Query) { return Data.filter(doc => matchQuery(query, doc)); }
+    async findOne(query: Types.Query) { return Data.filter(doc => matchQuery(query, doc))[0]; }
+    async update(query: Types.Query, document: Types.Document) {
         let updated = false;
-        Data = Data.map(doc => (matchQuery(query, doc) && ((updated = true) && data)) || doc);
-        if (!updated) Data.push(data);
+        Data = Data.map(doc => (matchQuery(query, doc) && ((updated = true) && document)) || doc);
+        if (!updated) Data.push(document);
     }
-    async insert(data: Types.DatabaseData) { Data.push(data); }
-    async delete(query: Types.DatabaseData) { Data = Data.filter(doc => !matchQuery(query, doc)); }
+    async insert(document: Types.Document) { Data.push(document); }
+    async delete(query: Types.Query) { Data = Data.filter(doc => !matchQuery(query, doc)); }
 
 }
 
