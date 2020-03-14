@@ -1,30 +1,34 @@
 {
-  "name": "abyssal",
-  "version": "0.0.2",
-  "description": "A discord.js framework, serving the purpose of, making your discord bot modular in nature.",
-  "main": "./build/index.js",
-  "typings": "./build/index.d.ts",
-  "scripts": {
-    "build": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/VimHax/Abyssal.git"
-  },
-  "author": "VimHax",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/VimHax/Abyssal/issues"
-  },
-  "homepage": "https://github.com/VimHax/Abyssal#readme",
-  "dependencies": {
-    "discord.js": "^12.0.2",
-    "uniqid": "^5.2.0"
-  },
-  "devDependencies": {
-    "@types/node": "^13.7.4",
-    "@types/uniqid": "^4.1.3",
-    "@types/ws": "^7.2.2",
-    "typescript": "^3.8.2"
-  }
+	"name": "abyssal",
+	"version": "0.0.3",
+	"description": "A discord.js framework, serving the purpose of, making your discord bot modular in nature.",
+	"main": "./build/index.js",
+	"typings": "./build/index.d.ts",
+	"scripts": {
+		"build": "tsc"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/VimHax/Abyssal.git"
+	},
+	"author": "VimHax",
+	"license": "MIT",
+	"bugs": {
+		"url": "https://github.com/VimHax/Abyssal/issues"
+	},
+	"homepage": "https://github.com/VimHax/Abyssal#readme",
+	"dependencies": {
+		"discord.js": "^12.0.2",
+		"uniqid": "^5.2.0"
+	},
+	"devDependencies": {
+		"@types/node": "^13.7.4",
+		"@types/uniqid": "^4.1.3",
+		"@types/ws": "^7.2.2",
+		"@typescript-eslint/eslint-plugin": "^2.23.0",
+		"@typescript-eslint/parser": "^2.23.0",
+		"eslint": "^6.8.0",
+		"eslint-config-marine": "^6.0.0",
+		"typescript": "^3.8.2"
+	}
 }
