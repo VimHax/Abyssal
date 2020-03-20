@@ -1,4 +1,4 @@
-# Abyssal - Alpha 0.0.4
+# Abyssal - Alpha 0.0.5
 <p><a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/v/abyssal.svg?maxAge=3600" alt="NPM version" /></a>
     <a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/dt/abyssal.svg?maxAge=3600" alt="NPM downloads" /></a>
 <br>
