@@ -1,4 +1,7 @@
 # Abyssal - Alpha 0.0.4
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/06dfe8a49a9c462fb64bce9172dcc774)](https://app.codacy.com/manual/VimHax/Abyssal?utm_source=github.com&utm_medium=referral&utm_content=VimHax/Abyssal&utm_campaign=Badge_Grade_Settings)
+
 <p><a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/v/abyssal.svg?maxAge=3600" alt="NPM version" /></a>
     <a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/dt/abyssal.svg?maxAge=3600" alt="NPM downloads" /></a>
 <br>
