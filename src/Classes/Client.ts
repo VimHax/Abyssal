@@ -16,7 +16,7 @@ export class Client extends DiscordJS.Client {
 	}
 
 	public emit(event: string | symbol, ...args: any[]) {
-		this.config.manager.eventHandler(event, args, this.config.database);
+		this.config.manager.eventHandler(event, args, this.config.database, this);
 		return super.emit(event, ...args);
 	}
 

@@ -18,7 +18,6 @@ export class Database {
 	// eslint-disable-next-line no-useless-constructor
 	public constructor(private readonly debug?: boolean) { }
 
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
 	public async initialize() { this.debug && console.log('Database --> Initialized'); }
 
 	public async find(query: Query) {

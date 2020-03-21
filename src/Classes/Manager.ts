@@ -1,6 +1,7 @@
 import { Util, Listener } from './Util';
 import { Database } from './Database';
 import { Tree, TreeID } from './Tree';
+import { Client } from './Client';
 import uniqid from 'uniqid';
 
 export class Manager {
@@ -18,7 +19,7 @@ export class Manager {
 		this.trees.splice(idx, 1);
 	}
 
-	public async eventHandler(event: string | symbol, args: any[], database: Database) {
+	public async eventHandler(event: string | symbol, args: any[], database: Database, client: Client) {
 		const eventList = await database.find({
 			type: 'listener',
 			event: event.toString()
@@ -32,6 +33,7 @@ export class Manager {
 				args,
 				session: e.session,
 				database,
+				client,
 				execBranch: tree.execBranch
 			}, this.debugUtil));
 		});
@@ -43,6 +45,7 @@ export class Manager {
 			args,
 			session: sessions[i],
 			database,
+			client,
 			execBranch: tree.execBranch
 		}, this.debugUtil)));
 	}

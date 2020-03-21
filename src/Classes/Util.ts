@@ -13,6 +13,7 @@ export interface Listener {
 
 import { Database, Query, Document } from './Database';
 import { Tree } from './Tree';
+import { Client } from './Client';
 
 function matchQuery(query: Query, document: Document): boolean {
 	const keys = Object.keys(query);
@@ -29,6 +30,7 @@ export class Util {
 	public state: State;
 	public listeners: Listener[] = [];
 	public database: Database;
+	public client: Client;
 	private readonly tree: Tree;
 
 	public constructor(config: {
@@ -38,6 +40,7 @@ export class Util {
 		args: any[];
 		session: string;
 		database: Database;
+		client: Client;
 		execBranch: (branchID: string, util: Util) => Promise<void>;
 	}, private readonly debug?: boolean) {
 		this.treeID = config.tree.id;
@@ -46,6 +49,7 @@ export class Util {
 		this.args = config.args;
 		this.session = config.session;
 		this.database = config.database;
+		this.client = config.client;
 		this.tree = config.tree;
 		this.state = {
 			type: 'state',

@@ -12,6 +12,7 @@ export interface Branch {
 
 export interface Tree {
 	on: (event: string | symbol, listener: (util: Util) => void) => this;
+	once: (event: string | symbol, listener: (util: Util) => void) => this;
 	emit: (event: string | symbol, util: Util) => boolean;
 }
 
