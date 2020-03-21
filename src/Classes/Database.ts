@@ -10,9 +10,7 @@ let Data: Document[] = [];
 
 function matchQuery(query: Query, document: Document): boolean {
 	const keys = Object.keys(query);
-	for (const key of keys) {
-		if (document[key] !== query[key]) return false;
-	}
+	for (const key of keys) if (document[key] !== query[key]) return false;
 	return true;
 }
 

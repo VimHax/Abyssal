@@ -8,7 +8,7 @@ export class Client extends DiscordJS.Client {
 	public constructor(public config: {
 		database: Database;
 		manager: Manager;
-		clientOptions: DiscordJS.ClientOptions;
+		clientOptions?: DiscordJS.ClientOptions;
 	}) {
 		super(config.clientOptions);
 		this.database = config.database;

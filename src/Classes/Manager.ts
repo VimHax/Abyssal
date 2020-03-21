@@ -26,7 +26,7 @@ export class Manager {
 		eventList.forEach(e => {
 			const tree = this.trees.find(trig => e.session.startsWith(trig.id));
 			tree?.execBranch(e.branch, new Util({
-				treeID: tree.id,
+				tree,
 				branchID: e.branch,
 				event,
 				args,
@@ -37,7 +37,7 @@ export class Manager {
 		});
 		const sessions: string[] = this.trees.map(tree => uniqid(`${tree.id}-`));
 		this.trees.forEach((tree, i) => tree.emit(event, new Util({
-			treeID: tree.id,
+			tree,
 			branchID: false,
 			event,
 			args,

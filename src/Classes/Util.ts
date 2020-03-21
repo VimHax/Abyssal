@@ -12,12 +12,11 @@ export interface Listener {
 }
 
 import { Database, Query, Document } from './Database';
+import { Tree } from './Tree';
 
 function matchQuery(query: Query, document: Document): boolean {
 	const keys = Object.keys(query);
-	for (const key of keys) {
-		if (document[key] !== query[key]) return false;
-	}
+	for (const key of keys) if (document[key] !== query[key]) return false;
 	return true;
 }
 
@@ -30,10 +29,10 @@ export class Util {
 	public state: State;
 	public listeners: Listener[] = [];
 	public database: Database;
-	private readonly execBranchMethod: (branchID: string, util: Util) => Promise<void>;
+	private readonly tree: Tree;
 
 	public constructor(config: {
-		treeID: string;
+		tree: Tree;
 		branchID: string | false;
 		event: symbol | string;
 		args: any[];
@@ -41,13 +40,13 @@ export class Util {
 		database: Database;
 		execBranch: (branchID: string, util: Util) => Promise<void>;
 	}, private readonly debug?: boolean) {
-		this.treeID = config.treeID;
+		this.treeID = config.tree.id;
 		this.branchID = config.branchID;
 		this.event = config.event;
 		this.args = config.args;
 		this.session = config.session;
 		this.database = config.database;
-		this.execBranchMethod = config.execBranch;
+		this.tree = config.tree;
 		this.state = {
 			type: 'state',
 			session: config.session
@@ -56,7 +55,8 @@ export class Util {
 
 	public execBranch(branchID: string) {
 		this.debug && console.log(`Util --> Execute Branch [ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ]`);
-		return this.execBranchMethod(branchID, this);
+		this.branchID = branchID;
+		return this.tree.execBranch(branchID, this);
 	}
 
 	public getStateProperty(property: string) {
@@ -121,14 +121,21 @@ export class Util {
 		return this.database.insert(listener);
 	}
 
-	public async removeListeners(event: (string | symbol) | true, branchID: string | true) {
-		this.debug && console.log(`Util --> Remove Listeners [ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ]`);
-		const query: Query = {};
-		if (event !== true) query.event = event.toString();
-		if (branchID !== true) query.branch = branchID;
+	public async removeListener(event: string | symbol, branchID: string) {
+		this.debug && console.log(`Util --> Remove Listener [ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ]`);
+		const query: Query = {
+			event: event.toString(),
+			branch: branchID
+		};
 		this.listeners = this.listeners.filter(listener => !matchQuery(query, listener));
 		query.type = 'listener';
 		query.session = this.session;
 		return this.database.delete(query);
+	}
+
+	public async removeAllListeners() {
+		this.debug && console.log(`Util --> Remove All Listeners [ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ]`);
+		this.listeners = [];
+		return this.database.delete({ type: 'listener', session: this.session });
 	}
 }
