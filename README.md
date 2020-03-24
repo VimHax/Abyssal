@@ -1,85 +1,59 @@
-# Abyssal - Alpha 0.0.4
+# Abyssal - 0.0.5 Alpha
+
 <p><a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/v/abyssal.svg?maxAge=3600" alt="NPM version" /></a>
     <a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/dt/abyssal.svg?maxAge=3600" alt="NPM downloads" /></a>
+    <a href="https://www.codacy.com/manual/VimHax/Abyssal?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=VimHax/Abyssal&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/7b935d0d874d4aa5860e8722fc276036" alt="Codacy grade" /></a>
 <br>
 <a href="https://nodei.co/npm/abyssal/"><img src="https://nodei.co/npm/abyssal.png?downloads=true&stars=true" alt="npm installnfo" /></a>
 </p>
 
-A [Discord.js](https://discord.js.org/) framework, whose goal is to make your Discord bot very modular in nature. Almost every component is customizable and, in fact, you are recommended to do so, as, the defaults are, to put lightly, unusable. This framework is more like a template, as, it basically doesn't come with any built-in features, such as syntax parsing, command cool-downs, permissions or even commands! Rather you have to build them on your own, giving you the full control over how your bot functions, only the most bare-bones functionality is provided.
+​	**Abyssal** is a *minimalist [Discord.js](https://discord.js.org/) framework*. It's **goal** is to make your Discord bot _**modular** & **elegant**_ in *nature*. Abyssal **divides** a typical Discord bot's functionality into **components**. All of these *components* can be *extended* to **add new or change existing functionality**. All of these components come together to *create a working Discord bot*. 
 
-I highly recommend you read the documentation, as this framework introduces many new concepts, which you may or may not have heard before, so that you can fully understand them & put them to use.
+> ​	I **highly recommended** you to **read the documentation** below, as Abyssal introduces **new concepts**, *which you may or may not have heard of before*, so that you can **be familiar with them & put them to use**.
 
-**Note - All the code in this README, as well as the framework, is written in [`Typescript`](https://www.typescriptlang.org/)**
+> ​	I also **highly recommended** that whenever you **extend** any of these **components**, you still **keep the general functionality** of each of the **methods** & **properties** as **described in the documentation**, so that *others can use your extended components*, in their own projects, *without hassle*.
 
-# Installation
+## Installation
 
-**[Node.js](https://nodejs.org/) 12.0.0 or newer is required. (For [Discord.js](https://discord.js.org/) to run properly)**
+**[Node.js](https://nodejs.org/) 12.0.0 or newer is required, for [Discord.js](https://discord.js.org/) to run properly.**
 
-Simply execute the following command on your terminal to install `Abyssal` - `npm install abyssal`
+Simply run the following command to install Abyssal - `npm install discord.js abyssal`
 
-# Example Usage
+> `Discord.js` is a peer dependency which is required to make Abyssal run properly, so it is also installed in the above command.
+
+## Documentation
+
+### Database - `new Database(debug?: boolean)`
+
+​	This *component* **abstracts** the **interaction between the bot & database** down to *6 simple methods*, *allowing* Abyssal to *interact with, virtually, any database imaginable*. The component, by *default*, stores data in *memory*, however, this can be changed by simply *extending* the component. Abyssal **stores `State` & `Listener` data** using this component, **by default**. (`State` & `Listener`s are elaborated under *Util* section in the documentation)
+
+#### Documents
+
+​	**The *"unit of data"* in the database is a `Document`** - `{ [key: string]: any }`. The **database** can be imagined as *a large **array of `Document`s***.
+
+#### Queries
+
+​	**Queries return**, *one or more*, **`Document`s which match** the *"shape"* of **the provided `Query`** - `{ [key: string]: any }` object, from the database. **A `Document` matches** the *"shape"* of **a `Query` object**, **if *all* the values of *all* the properties in the `Query` object *match* the values of the *corresponding* properties in the `Document`**.  The following `function` returns `true` or `false` if & if not the provided `Document` matches the *"shape"* of the provided `Query` object, respectively.
 
 ```typescript
-import * as Abyssal from "abyssal";
-
-const triggerManager = new Abyssal.TriggerManager();
-const jobManager = new Abyssal.JobManager();
-
-const Ping = new Abyssal.Trigger({
-	id: "ping",
-	events: ["message"],
-	eventListeners: [],
-	validator: async (event, [message], util) => !message.author.bot && message.content == "ping",
-	executor: async (event, [message], util) => message.channel.send("pong!")
-});
-
-triggerManager.add(Ping);
-
-const client = new Abyssal.Client({
-	database: new Abyssal.Database(),
-	triggerManager: triggerManager,
-	jobManager: jobManager
-});
-
-client.login("secret token");
-client.on("ready", () => console.log(`Client Logged In - ${client.user?.tag}`));
+function matchQuery(query: Query, document: Document): boolean {
+	const keys = Object.keys(query);
+	for (const key of keys) if (document[key] !== query[key]) return false;
+	return true;
+}
 ```
 
-# Documentation
-
-## Database - `new Abyssal.Database()`
-
-This class abstracts the interactions between the client & the database into very simple methods which the framework uses to interact with virtually any database imaginable, given that the class extension is implemented as specified. The default implementation is provided below under *Example Implementation*.
- 
-**Documents**
-
-The *"unit of data"* in the database is a `Document`. A `Document` is defined as - `{ [key: string]: any }`. The database can be thought of as (& is how it's actually implemented in the default implementation) an array of `Document`s.
-
-**Queries**
-
-*Querying the database* means filtering certain `Document`s out of the database, specifically, `Document`s which match a certain *"shape"*. This *"shape"* is defined by the `Query` object. The `Query` object has the same definition as the `Document` object - `{ [key: string]: any }`.
-
-A `Document` matches the *"shape"* defined by the `Query` object if, & only if, all the values of all the properties of the `Query` object correspond to the values of corresponding the properties of the `Document`. (Strict equality)
-
-**Examples Of Queries**
-
-Assume all the `Document`s in the database are the following...
-```typescript
-[
-	{ type: "number", value: 1 },
-	{ type: "number", value: 2 },
-	{ type: "letter", value: "A" }
-]
- ```
-The `Query` object, `{ type: "number" }`, matches the *"shape"* of `{ type: "number", value: 1 }` & `{ type: "number", value: 2 }` but not `{ type: "letter", value: "A" }`, because the `type` property in the `Query` object is not equal to that of the `Document`, `Query.type != Document.type`.
-
-Similarly, the `Query` object, `{ value: "A"}`, only matches the *"shape"* of `{ type: "letter", value: "A" }` because this is the only document whose `value` property is equal to `"A"`, `Query.value == Document.value`
-
-And, as a final example, the `Query` object, `{ type: "number", value: 2 }`, only matches `{ type: "number", value: 2 }` as this is the only document whose properties, `type`, `number`, are equal to the corresponding values, `"number"`, `2`, `Query.type == Document.type && Query.value == Document.value`
-
-**Definition**
+#### Interface
 
 ```typescript
+interface Document {
+    [key: string]: any
+}
+
+interface Query {
+    [key: string]: any
+}
+
 interface Database {
 	initialize: () => Promise<void>;
 	find: (query: Query) => Promise<Document[]>;
@@ -90,736 +64,999 @@ interface Database {
 }
 ```
 
-| Method       | Function                                                                                                                                                                              |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `initialize` | Runs any code which is required to initialize the methods, like creating the connection to the database, for example.                                                                 |
-| `find`       | Returns an array of `Document`s, all of which match the `Query` object provided. (Empty array if none of the `Document`s match)                                                       |
-| `findOne`    | Returns one `Document` which matches the `Query` object provided. (`undefined` if none of the `Document`s match)                                                                      |
-| `update`     | Replaces all the `Document`s which match the `Query` object with the `Document` provided. If there were no replacements, then the provided `Document` is inserted in to the database. |
-| `insert`     | Inserts the provided `Document` in to the database.                                                                                                                                   |
-| `delete`     | Deletes any `Document` which matches the `Query` object provided.                                                                                                                     |
+#### Functionality
 
-**Example Implementation (The Default Implementation)**
- ```typescript
-import * as Abyssal from "abyssal";
+|    Method    | Function                                                     |
+| :----------: | :----------------------------------------------------------- |
+| `initialize` | **Runs *any* code** which is **required** to **initialize** *the methods*, like creating the connection to the database, for example. This method is called *before* the `Client` logs in. |
+|    `find`    | **Returns** an **array of `Document`s**, *all* of which **match** the **`Query` object** provided. (**Empty array** if *none* of the `Document`s **match**) |
+|  `findOne`   | **Returns** *one* **`Document`** which **matches** the **`Query` object** provided. (**`undefined`** if *none* of the `Document`s **match**) |
+|   `update`   | **Replaces** *all* the **`Document`s** which **match** the **`Query` object** *with* the **`Document` provided**. If there were *no* replacements, then the **provided `Document`** is **inserted** in to the **database**. |
+|   `insert`   | **Inserts** the **provided `Document`** in to the **database**. |
+|   `delete`   | **Deletes** *any* **`Document`** which **matches** the **`Query` object** provided. |
 
-// Data is the "database" which holds all the Documents in this implementation
-let Data: Abyssal.Document[] = [];
+#### Example Extension
 
-// This function checks whether a specified Document matches a specified Query
-function matchQuery(query: Abyssal.Query, document: Abyssal.Document): boolean {
-	const props = Object.keys(query);
-	let found = true;
-	props.forEach(prop => document[prop] === query[prop] || (found = false));
-	return found;
-}
+```typescript
+import * as Abyssal from 'abyssal';
 
-class Database extends Abyssal.Database {
+let Data: Abyssal.Document[] = []; // The "database" holding all the documents
 
-	async initialize() {} // Empty method as there is nothing to initialize
-	
-	// Filters out & returns the Documents which match the Query
-	async find(query: Abyssal.Query) {
+export class Database extends Abyssal.Database {
+    // Empty, since there is no code needed to be ran to initialize the methods
+	public async initialize() { }
+
+    // Filters & returns all documents which matchQuery returns true to
+	public async find(query: Abyssal.Query) {
 		return Data.filter(doc => matchQuery(query, doc));
 	}
 
-	// Filters out & returns the first Document which matches the Query
-	async findOne(query: Abyssal.Query) {
-		return Data.filter(doc => matchQuery(query, doc))[0];
+    // Finds & returns one document which matchQuery returns true to, undefined if none
+	public async findOne(query: Abyssal.Query) {
+		return Data.find(doc => matchQuery(query, doc));
 	}
-	
-	// Replaces all Documents which match the Query with the Document provided
-	// If nothing was replaced, it inserts the Document in to the "database"
-	async update(query: Abyssal.Document, document: Abyssal.Document) {
-		let updated = false;
+
+	public async update(query: Abyssal.Query, document: Abyssal.Document) {
+		let updated = false; // Set to true if atleast one document was replaced
+        // Maps all the documents which matchQuery returns true to, with the provided
+    	// document
 		Data = Data.map(doc => (matchQuery(query, doc) && ((updated = true) && document)) || doc);
+        // If updated is false, meaning none of the documents were replaced, the
+        // provided document is pushed into the array
 		if (!updated) Data.push(document);
 	}
-	
-	// Inserts the Document in to the "database"
-	async insert(data: Abyssal.Document) {
-		Data.push(data);
+
+    // Simply pushes the provided document into the array
+	public async insert(document: Abyssal.Document) {
+		Data.push(document);
 	}
 
-	// Filters out the Documents which do not match the Query & replaces the "database" with it
-	async delete(query: Abyssal.Document) {
+    // Filters all the documents which matchQuery does NOT return true to, &
+    // replaces the "database" with it
+	public async delete(query: Abyssal.Query) {
 		Data = Data.filter(doc => !matchQuery(query, doc));
 	}
-	
-}
-
-export default Database;
-```
-
-## Trigger - `new Abyssal.Trigger(TriggerConfig)`
-
-This class is the equivalent to the `Command` class in other frameworks, except, `Trigger`s are much more general. Conventionally, `Command`s are triggered only through [`message`](https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=e-message) events, however, `Trigger`s  can be triggered through any `Event`. (even the [`"debug"`](https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=e-debug) event if you wish) Therefore, they are much more flexible than `Command`s. It extends the built-in [EventEmitter](https://nodejs.org/api/events.html) class in [Node.js](https://nodejs.org/), to provide a event-based API to handle `Listener`s.
-
-**Definition**
-
-```typescript
-type Event = string | symbol;
-type EventArgs = any[];
-type EventListener = (args: EventArgs, util: Util) => void;
-type TriggerID = string;
-type TriggerExecutor = (event: Event, args: EventArgs, util: Util) => Promise<void>;
-type TriggerValidator = (event: Event, args: EventArgs, util: Util) => Promise<boolean>;
-
-interface Trigger extends EventEmitter {
-	id: TriggerID; // The unique ID of the Trigger
-	events: Event[]; // All the Events which TriggerValidator will be executed on
-	eventListeners: Event[]; // All the Events, Listeners may be attached to
-	execute: TriggerExecutor; // The TriggerExecutor function
-	validate: TriggerValidator; // The TriggerValidator function
-	eventHandler: (event: Event, args: EventArgs, util: Util) => void; // EventEmitter.emit wrapper
-	on: (event: Event, listener: EventListener) => this; // EventEmitter.on type
 }
 ```
 
-**Events, Event Arguments & Event Listeners**
+### Tree - `new Tree(id: TreeID)`
 
-A `Event`, which is defined as - `string | symbol`, refers to any `Event` which [emits](https://nodejs.org/api/events.html#events_emitter_emit_eventname_args) on the Discord.js [`Client`](https://discord.js.org/#/docs/main/stable/class/Client). So, [`"message"`](https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=e-message), [`"messageReactionAdd"`](https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=e-messageReactionAdd), [`"ready"`](https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=e-ready) etc. (can be a custom `Event` as well) 
+​	This component **fulfills the same functionality `Command` classes do in other frameworks**. However, there are *major* differences. Conventionally, `Command`s are only triggered whenever a [`message`](https://discord.js.org/#/docs/main/stable/class/Client?scrollTo=e-message) event is emitted, `Tree`s, instead, **can be triggered through *any* event**. Additionally, unlike `Command`s, `Tree`s **_contain_ `Branch`es**, which are *named code blocks which can be executed using the `Util` instance provided*. (basically a `Function`) This component ***extends* the built-in [`EventEmitter`](https://nodejs.org/api/events.html#events_class_eventemitter) class**, to provide a *event-based API* to handle the event emissions.
 
-Event arguments or `EventArgs`, which is defined as - `any[]`, refers to the arguments provided by the `Event`. So, in the case of the `"message"` `Event`, `EventArgs` would be `[ DiscordJS.Message ]` & in the case of the `"messageReactionAdd"` `Event`, `EventArgs` would be `[ DiscordJS.MessageReaction, DiscordJS.User ]`
-
-A `EventListener`, which is defined as - `(args: EventArgs, util: Util) => void`, is simply a function  which handles `Event` emissions. However, the arguments are always `EventArgs` & `Util`. (`Util` is covered later on in the documentation)
-
-**Trigger Executor & Trigger Validator**
-
-`TriggerExecutor`, which is defined as - `(event: Event, args: EventArgs, util: Util) => Promise<void>`, is the *"body"* or *"content"* of the `Trigger`. It is executed if, & only if, the `TriggerValidator` returns true.
-
-`TriggerValidator`, which is defined as - `(event: Event, args: EventArgs, util: Util) => Promise<boolean>`, decides whether or not to execute `TriggerExecutor`. If it does or does not, it returns `true` or `false`, respectively.
-
-**Config**
+#### Interface
 
 ```typescript
-interface TriggerConfig {
-	id: TriggerID; // The unique ID of the Trigger
-	events: Event[]; // All the Events which TriggerValidator will be executed on
-	eventListeners: Event[]; // All the Events, Listeners may be attached to
-	executor: TriggerExecutor; // The TriggerExecutor function
-	validator: TriggerValidator; // The TriggerValidator function
+type TreeID = string;
+type BranchID = string;
+type BranchMethod = (util: Util) => Promise<void>;
+
+interface Tree extends EventEmitter {
+    id: TreeID;
+    branch: (id: BranchID, method: BranchMethod) => void;
+    execBranch: (id: BranchID, util: Util) => Promise<void>;
+    on: (event: string | symbol, listener: (util: Util) => void) => this;
+	once: (event: string | symbol, listener: (util: Util) => void) => this;
+	emit: (event: string | symbol, util: Util) => boolean;
 }
 ```
 
-**Example Usage**
+#### Functionality
 
-Below is a implementation of a `Trigger` which responds with `"pong!"` when you send `"ping"`.
+| Property | Function                                                 |
+| :------: | :------------------------------------------------------- |
+|   `id`   | A `string` which **uniquely** identifies *each* `Tree` . |
 
-```
-User -> ping
- Bot -> pong!
-```
+|  **Method**  | Function                                                     |
+| :----------: | ------------------------------------------------------------ |
+|   `branch`   | **Defines** a `Branch` .                                     |
+| `execBranch` | **Finds** a **`Branch`** *with* the **provided `id`** & **calls** it's **`BranchMethod`** *with* the **provided `Util` instance** as it's *only* **argument**. Throws an **error** if a `Branch` was **not** found. |
+
+**All** the *other* properties have the **same** functionality as in the **`EventEmitter` class**.
+
+#### Example Extension
 
 ```typescript
-import * as Abyssal from "abyssal";
+import * as Abyssal from 'abyssal';
 
-const Ping = new Abyssal.Trigger({
-	id: "ping",
-	events: ["message"], // ["message"] since we only care about the "message" event
-	eventListeners: [], // Empty since we don't attach any Listeners
-	// Returns true if the author is not a bot & if the content is equal to "ping"
-	validator: async (event, [message], util) => !message.author.bot && message.content == "ping",
-	// Sends "pong!" to the channel the message was sent on
-	executor: async (event, [message], util) => message.channel.send("pong!")
+interface Branch {
+	id: Abyssal.BranchID;
+	method: Abyssal.BranchMethod;
+}
+
+export class Tree extends Abyssal.Tree {
+	private readonly allBranches: Branch[] = []; // Contains all the branches
+
+	public constructor(public id: Abyssal.TreeID) {
+		super(id);
+	}
+
+	public branch(id: Abyssal.BranchID, method: Abyssal.BranchMethod) {
+		this.allBranches.push({ id, method }); // Pushes a new branch into the array
+	}
+
+    // Finds the branch with the given ID & executes it's method,
+    // throws an error if a branch was not found
+	public async execBranch(id: Abyssal.BranchID, util: Abyssal.Util) {
+		const branch = this.allBranches.find(branch => branch.id === id);
+		if (branch) await branch.method(util);
+		else throw new Error(`Branch does not exist - ${id}`);
+	}
+}
+```
+
+#### Example Usage
+
+##### Example 1
+
+The example *below* is of a `Tree` which **responds to `"ping"` with `"Pong!"`**.
+
+![Example Usage](https://i.postimg.cc/7L13FBqq/Peek-2020-03-24-19-03.gif)
+
+```typescript
+import * as Abyssal from 'abyssal';
+
+const Ping = new Abyssal.Tree('ping');
+
+// on 'message'
+Ping.on('message', util => {
+	const { args: [message] } = util;
+    // If the author is not a bot & the content is equal to 'ping'
+	if (!message.author.bot && message.content === 'ping') {
+        // Respond with 'Pong!'
+        message.channel.send('Pong!');
+    }
 });
 
 export default Ping;
 ```
 
-## Util - `new Abyssal.Util(TriggerID, TriggerSession, Database)`	
+##### Example 2
 
-In the default implementation, this class mainly provides methods to load, change, save, delete `TriggerState`
- & add or remove `Listener`s using the provided `Database`. Instances of `Util` are *binded* to a `TriggerID` & `TriggerSession`.
+*Below* is a example of `Tree` which **sends join & leave messages to a channel**, *with the ID `CHANNEL_ID`*.
 
-**Definition**
-
-```typescript
-type State = Document;
-type StateProperty = string;
-type StateValue = any;
-type TriggerSession = string;
-
-interface Util {
-	// ID of the Trigger
-	id: TriggerID;
-	// The local State of the Trigger, may not up to date with the one saved in the Database
-	state: State;
-	// The Trigger Session
-	session: TriggerSession;
-	// The Database provided
-	database: Database;
-	// Returns the value of the property provided of the local State, undefined if it doesn't exist
-	getStateProperty: (property: StateProperty) => StateValue | undefined;
-	// Sets the property provided to the value provided in the local State
-	setStateProperty: (property: StateProperty, value: StateValue) => void;
-	// Deletes a provided property off of the local State
-	deleteStateProperty: (property: StateProperty) => void;
-	// Updates the local State with the one saved in the Database
-	loadState: () => Promise<void>;
-	// Updates the Database to the local State
-	saveState: () => Promise<void>;
-	// Deletes the Trigger State in the Database
-	deleteState: () => Promise<void>;
-	// Adds a Listener to the Trigger
-	addListener: (event: Event) => Promise<void>;
-	// Removes a Listener in the Trigger
-	removeListener: (event: Event) => Promise<void>;
-	// Removes all Listeners in the Trigger
-	removeAllListeners: () => Promise<void>;
-}
-```
- 
-**Session**
-
-In the default implementation of the `TriggerManager`, the `TriggerSession` is created right before the `TriggerValidator` is called. It is in the form of a `string` in the format `"${TriggerID}-auniquestring"` which is generated using [`Uniqid`](https://www.npmjs.com/package/uniqid). It stays constant among the `TriggerValidator`, `TriggerExecutor` & `EventListeners` if it's in the same *instance*. (The idea of *instances* will be elaborated on at the end of this section)
-
-**State**
-
-The `State` is a `Document` which, well, keeps track of the `Trigger`'s state. The `State` is also *binded* to the `TriggerSession`, anywhere the `TriggerSession` is constant, the same `State` is carried. The `State` is stored in the `Database`, so that, if the `Database` is *persistent* (whose data would be available even after the application has been fully restarted), the `State` can still be maintained. However, do not confuse the actual `State` vs the local `State`, `Util`'s `getStateProperty`, `setStateProperty` & `deleteStateProperty` methods only manipulate the local `State`, the actual `State`, which is saved in the `Database`, is unchanged. To update the actual `State`, you have to run the `saveState` method, it updates the actual `State` with the local one. This is done to increase efficiency, as updating one major change is more efficient than updating on many minor changes. (This also means that the methods which manipulate the local `State` can be, & are, synchronous) Keep in mind that the actual `State` isn't loaded in to the local `State` when `Util` is initialized, so the `loadState` method is required to be ran to retrieve the most up to date actual `State`. The format of the `State` `Document` is given below.
+![Example Usage](https://i.postimg.cc/7Zz78Bqf/Peek-2020-03-24-19-14.gif)
 
 ```typescript
-{
-	type: "triggerstate",
-	session: TriggerSession,
-	[key: string]: any
-}
+import * as Abyssal from 'abyssal';
+import DiscordJS from 'discord.js';
+
+const JoinLeaveMsg = new Abyssal.Tree('joinleavemsg');
+
+// on 'guildMemberAdd'
+JoinLeaveMsg.on('guildMemberAdd', util => {
+	const { args: [member] } = util;
+	const channel = util.client.channels.cache.get(CHANNEL_ID); // Get the channel
+    // If the channel exists
+	if (channel) {
+        // Send 'member has joined!'
+        (channel as DiscordJS.TextChannel).send(`${member.displayName} has joined!`);
+    }
+});
+
+// on 'guildMemberRemove'
+JoinLeaveMsg.on('guildMemberRemove', util => {
+	const { args: [member] } = util;
+	const channel = util.client.channels.cache.get(CHANNEL_ID); // Get the channel
+    // If the channel exists
+	if (channel) {
+        // Send 'member has left!'
+        (channel as DiscordJS.TextChannel).send(`${member.displayName} has left!`);
+    }
+});
+
+export default JoinLeaveMsg;
 ```
 
-**Listeners**
+##### Example 3
 
-The term `Listener` refers to a `Document` which stores data about the `Event` that it is attached to. From any `Listener`, the `Trigger` which attached the `Listener`, in what `TriggerSession` as well as the `State` can be found. When any `Event` is emitted, the `Abyssal` `Client` runs the `TriggerManager`, which in it's default implementation, runs a query to find any `Listener`s attached to the `Event` emitted. If the query returns with at least one `Listener`,  then the `TriggerManager` finds which `Trigger` attached that `Listener`, then generates a `Util` instance & feeds the `Event`, `EventArgs` & the `Util` instance to the `eventHandler` method of the `Trigger`, this will cause any `EventListener`s, attached to the corresponding `Event` in the `Trigger`, to fire.  How this works can be much better understood by giving a peek at the code in `Client.ts` and `TriggerManager.ts` under `/Classes/`. The format of a `Listener` `Document` is given below.
+The *final* example is of a `Tree` which **adds 2 given numbers**. `Branch`es are used in this `Tree` to *"organize"* the steps taken to *execute the command*, however, this isn't the purpose `Branch`es  are *meant* to serve, the *true purpose* `Branch`es serve is documented under the *Util* section.
+
+![Example Usage](https://i.postimg.cc/sg8rScW9/Peek-2020-03-24-19-17.gif)
 
 ```typescript
-{
-	type: `listener`,
-	session: TriggerSession,
-	event: Event
-}
-```
+import * as Abyssal from 'abyssal';
 
-**Example Usage**
+const Add = new Abyssal.Tree('add');
 
-These ideas can be best shown & understood through examples. All the following examples make use of all the three ideas, `TriggerSession`, `State` & `Listener`s. 
+// on 'message'
+Add.on('message', util => {
+	const { args: [message] } = util;
+    // If the author is not a bot
+	if (!message.author.bot) {
+        // Execute the 'validate' branch
+        util.execBranch('validate');
+    }
+});
 
-This first example is of a `Trigger` which generates a number when you send `"gen number"` & to see it, you need to respond with `"show number"`.
-
-```
-User -> gen number
- Bot -> Generated number!
- Bot -> Please respond with 'show number' to show the generated number.
-User -> show number
- Bot -> The number was - TheGeneratedNumber
-```
-
-```typescript
-import * as Abyssal from "abyssal";
-
-const GenNumber = new Abyssal.Trigger({
-	id: "gennumber",
-	events: ["message"],
-	eventListeners: ["message"], // ["message"] since we attach a Listener only to the "message" Event
-	validator: async (event, [message], util) => !message.author.bot && message.content == "gen number",
-	executor: async (event, [message], util) => {
-		const number = Math.round(Math.random() * 100);
-		util.setStateProperty("number", number); // Set the number property in the local State
-		await util.saveState(); // Update the actual State
-		await util.addListener("message"); // Add the "message" Listener
-		await message.channel.send("Generated number!");
-		await message.channel.send("Please respond with 'show number' to show the generated number.");
+// The 'validate' branch
+Add.branch('validate', async util => {
+	const { args: [message] } = util;
+    // If the message starts with 'add'
+	if (message.content.startsWith('add')) {
+        // Split the content by ' '
+		const args: string[] = message.content.slice(3).split(' ');
+        // Remove the first element (which will always be 'add')
+		args.shift();
+        // If the array is empty
+		if (args.length === 0) {
+            // Send 'Please provide 2 numbers to add.'
+			message.channel.send('Please provide 2 numbers to add.');
+			return;
+		}
+        // If any of the provided arguments do not parse into a number
+		if (args.find(arg => isNaN(parseInt(arg, 10)))) {
+            // Send 'Invalid number provided.'
+			message.channel.send('Invalid number provided.');
+			return;
+		}
+        // If only one argument was provided
+		if (args.length !== 2) {
+            // Send 'Please provide the 2nd number to add.'
+			message.channel.send('Please provide the 2nd number to add.');
+			return;
+		}
+		util.execBranch('execute'); // Execute the 'execute' branch
 	}
 });
 
-// Listen to the "message" Event
-GenNumber.on("message", async ([message], util) => {
-	if (message.author.bot) return; // Return if the message was sent by a bot
-	await util.loadState(); // Retrieve the actual State
-	await util.deleteState(); // Delete the State Document in the Database
-	await util.removeListener("message"); // Remove the "message" Listener
-	// Send the message if the content was "show number"
-	if (message.content == "show number")
-		await message.channel.send(`The number was - ${util.getStateProperty("number")}`);
+// The 'execute' branch
+Add.branch('execute', async util => {
+	const { args: [message] } = util;
+    // Split the content by ' '
+	const args: string[] = message.content.split(' ');
+    // Remove the first element
+	args.shift();
+    // Map all the string arguments into numbers
+	const numbers = args.map(arg => parseInt(arg, 10));
+    // Total the numbers
+	const answer = numbers.reduce((acc, curr) => acc + curr);
+    // Send the answer
+	message.channel.send(`${answer} is the answer. (${numbers[0]} + ${numbers[1]})`);
 });
-	
+
+export default Add;
+```
+
+### Util - `new Util(config: UtilConfig, debug?: boolean)`
+
+​	This component's **main purpose** is to **expose methods**, to the `Tree`, **which manipulate** it's **`State` & `Listener`s**. However, this component *also* contains properties, which expose the *current `event` name, the current `event` `arguments`, the `Client` which is executing the `Tree` etc*. The *below* explanations of `Session` & `Listener`s will probably be *confusing*, hopefully the *Example Usage* section will get rid of the confusion.
+
+#### Session
+
+​	**When *any* `event` is emitted** on the `Client`, a **new `Session` is created** for **each `Tree`**. The `Session`, which is in the format `${TreeID}-someuniquestring`, generated using [Uniqid](https://www.npmjs.com/package/uniqid), **uniquely** identifies **each** *instance* of the `Tree` executed/executing. Notice, **every single `Tree` execution** always starts inside of a `event listener`, *attached* to the `Tree`, & it **always** ends in either the `event listener`, which started it, or inside a `Branch`. The whole *journey* of this execution, from the `event listener` till the end, is one *instance* of a `Tree`. `Util.session` exposes the `Session` of the current *instance*.
+
+#### State
+
+​	**Each *instance* can have it's own `State`**. **`State` is** basically **a `Document`** which you can **store data to**, which may want to access later in the same *instance* in a different `Branch`. `State` is **unique to each *instance***, it's *tracked* using the `Session` string. Below is the `Interface` *defining* the `State` document. (notice that *additional* properties can be added to it, these would be the *actual data stored*)
+
+```typescript
+interface State {
+	type: 'state';
+	session: string;
+	[key: string]: any;
+}
+```
+
+​	**Do not confuse `Util.state` with the actual `State`**. **`Util.state` contains a local copy of the actual `State`**, for *fast access & editing*, it is **not guaranteed to be the *same* as the actual `State`**, *which is stored in the database*. This is *why* the methods which use the local `State`, `Util.getStateProperty` for example, are *synchronous*, as they only use the *local `State`*, which is *stored in memory*, & why methods, which *use the actual `State`*, `Util.saveState` for example,  are *asynchronous*, as they have to use the *asynchronous methods provided by the `Database` component* to store the `Document` in the database. **Note, the actual `State` is not loaded into `Util.state` when `Util` is initialized, thus, to access data in the actual `State`, first run the method `Util.loadState`.**
+
+#### Listeners
+
+​	Using `Listener`s, you may **make *any* `Branch` execute whenever *any* `event` is emitted**. This is the *true* purpose `Branch`es serve. Whenever a `Branch` is executed using a `Listener`, the `Branch` is still part of the same *instance*, meaning it contains *the same `Session` & `State`*. Below is the `Interface` *defining* the `Listener` document.
+
+```typescript
+interface Listener {
+	type: 'listener';
+	event: string;
+	session: string;
+	branch: string;
+}
+```
+
+​	`Util.listeners` contains a *local copy* of the `Listener`s which are currently *attached* to the current *instance*. Like with the local `State`, **`Util.listeners` may not reflect the actual `Listener`s attached**. However, running `Util.loadListeners` will copy *all* the `Listener`s attached, to the array.
+
+#### Interface
+
+```typescript
+interface Util {
+    treeID: string;
+	branchID: string | false;
+	event: string | symbol;
+	args: any[];
+	session: string;
+	state: State;
+	listeners: Listener[];
+	database: Database;
+	client: Client;
+    execBranch: (branchID: string) => Promise<void>;
+    getStateProperty: (property: string) => void; 
+    setStateProperty: (property: string, value: any) => void;
+    deleteStateProperty: (property: string) => void;
+    loadState: () => Promise<void>;
+    saveState: () => Promise<void>;
+    deleteState: () => Promise<void>;
+    loadListeners: () => Promise<void>;
+    addListener: (event: string | symbol, branchID: string) => Promise<void>;
+    removeListener: (event: string | symbol, branchID: string) => Promise<void>;
+    removeAllListeners: () => Promise<void>;
+}
+
+interface UtilConfig {
+    tree: Tree;
+	branchID: string | false;
+	event: symbol | string;
+	args: any[];
+	session: string;
+	database: Database;
+	client: Client;
+}
+```
+
+#### Functionality - `Util Interface`
+
+|  Property   | Function                                                     |
+| :---------: | ------------------------------------------------------------ |
+|  `treeID`   | The **ID of the current `Tree`** being executed.             |
+| `branchID`  | The **ID of the current `Branch`,** `false` if currently *not* in a `Branch`. |
+|   `event`   | The *name* of the **current `event`**.                       |
+|   `args`    | The **`argument`s provided** by the `event`.                 |
+|  `session`  | The **current `Session`**.                                   |
+|   `state`   | **Local copy of the actual `State`**, *may be outdated*.     |
+| `listeners` | **Local copy of** *all* the **currently attached `Listener`s**, *may be outdated*. |
+| `database`  | **The `Database` component** provided to the `Client`, *on initialization*. |
+|  `client`   | **The `Client`** which is executing the `Tree`.              |
+
+|        Method         | Function                                                     |
+| :-------------------: | ------------------------------------------------------------ |
+|     `execBranch`      | **Executes the `Branch` with the given ID**, throws an error if a `Branch` with the given ID *doesn't exist*. (**The same `Util` instance is passed down as the `argument`**) |
+|  `getStateProperty`   | **Returns the value of the property**, with the given name, **of the local `State`**. |
+|  `setStateProperty`   | **Sets the value of the property**, with the given name, to the given value, **of the local `State`**. |
+| `deleteStateProperty` | **Deletes the property**, with the given name, **off of the local `State`**. |
+|      `loadState`      | **Finds the actual `State`**, in the database, **& replaces the local `State` with it**. If *not found*, a `State`, containing *only the properties defined by the `Interface`*, is set to the local `State`. |
+|      `saveState`      | **Updates the actual `State`** with the local `State`.       |
+|     `deleteState`     | **Deletes the `State`** document off of the database.        |
+|    `loadListeners`    | **Copies all the `Listeners`**, *stored in the database*, **to** the **`Util.listeners`** array. |
+|     `addListener`     | **Adds a new `Listener`** to the database, which is *attached* to the `event` & `BranchID` provided. |
+|   `removeListener`    | **Removes all `Listener`s** which are **_attached_ to the `event` & `BranchID`** provided. |
+| `removeAllListeners`  | **Removes all `Listener`s** *attached* to the current *instance*. |
+
+#### Functionality - `UtilConfig Interface`
+
+|  Property  | Function                                                     |
+| :--------: | ------------------------------------------------------------ |
+|   `tree`   | **The `Tree`** to *bind* the `Util` instance to.             |
+| `branchID` | **The ID of the `Branch`** *currently* being executed, `false` is none. |
+|  `event`   | The *name* of the **`event` emitted**.                       |
+|   `args`   | **The `argument`s** provided by the `event`.                 |
+| `session`  | **The `Session`** to *bind* the `Util` instance to.          |
+| `database` | **The `Database` component** provided to the `Client`, *on initialization*. |
+|  `client`  | **The `Client`** which is executing the `Tree`.              |
+
+#### Example Extension
+
+```typescript
+import * as Abyssal from 'abyssal';
+
+export class Util extends Abyssal.Util {
+	public treeID: string;
+	public branchID: string | false;
+	public event: string | symbol;
+	public args: any[];
+	public session: string;
+	public state: Abyssal.State;
+	public listeners: Abyssal.Listener[] = [];
+	public database: Abyssal.Database;
+	public client: Abyssal.Client;
+	private readonly currentTree: Abyssal.Tree; // Holds the current tree
+
+	public constructor(config: {
+		tree: Abyssal.Tree;
+		branchID: string | false;
+		event: symbol | string;
+		args: any[];
+		session: string;
+		database: Abyssal.Database;
+		client: Abyssal.Client;
+	}) {
+		super(config);
+		this.treeID = config.tree.id;
+		this.branchID = config.branchID;
+		this.event = config.event;
+		this.args = config.args;
+		this.session = config.session;
+		this.database = config.database;
+		this.client = config.client;
+		this.currentTree = config.tree; // Set the current tree
+        // Set default local state
+		this.state = {
+			type: 'state',
+			session: config.session
+		};
+	}
+
+    // Execute the execBranch method of the current tree
+	public execBranch(branchID: string): Promise<void> {
+		this.branchID = branchID;
+		return this.currentTree.execBranch(branchID, this);
+	}
+
+    // Return the value of the property
+	public getStateProperty(property: string) {
+		return this.state[property];
+	}
+
+    // Set the value of the property
+	public setStateProperty(property: string, value: any) {
+		this.state[property] = value;
+	}
+
+    // Delete the property
+	public deleteStateProperty(property: string) {
+		delete this.state[property];
+	}
+
+    // Find state document from database & replace local state with it,
+    // if there is none, set it to default local state
+	public async loadState() {
+		this.state = (await this.database.findOne({
+			type: 'state',
+			session: this.session
+		}) || {
+			type: 'state',
+			session: this.session
+		}) as Abyssal.State;
+	}
+
+    // Update the state document with the local state,
+    // If the database didn't have a state document, the update method will
+    // insert the document, as it's suppose to do
+	public saveState() {
+		return this.database.update({
+			type: 'state',
+			session: this.session
+		}, this.state);
+	}
+
+    // Delete the state document
+	public deleteState() {
+		return this.database.delete({
+			type: 'state',
+			session: this.session
+		});
+	}
+
+    // Find all the listeners & set Util.listeners to it
+	public async loadListeners() {
+		this.listeners = (await this.database.find({
+			type: 'listener',
+			session: this.session
+		})) as Abyssal.Listener[];
+	}
+
+    // Insert a new listener to the database,
+    // update Util.listeners appropriately as well
+	public async addListener(event: string | symbol, branchID: string) {
+		const listener: Abyssal.Listener = {
+			type: 'listener',
+			event: event.toString(),
+			session: this.session,
+			branch: branchID
+		};
+		this.listeners.push(listener);
+		return this.database.insert(listener);
+	}
+
+    // Remove a listener from the database,
+    // update Util.listeners appropriately as well
+	public async removeListener(event: string | symbol, branchID: string) {
+		const query: Abyssal.Query = {
+			event: event.toString(),
+			branch: branchID
+		};
+		this.listeners = this.listeners.filter(listener => !matchQuery(query, listener));
+		query.type = 'listener';
+		query.session = this.session;
+		return this.database.delete(query);
+	}
+
+    // Remove all listeners, by querying only the type & session
+	public async removeAllListeners() {
+		this.listeners = [];
+		return this.database.delete({ type: 'listener', session: this.session });
+	}
+}
+```
+
+#### Example Usage
+
+##### Example 1
+
+The example *below* is of a `Tree` which **generates a random number**, between 0 & 100.
+
+![Example Usage](https://i.postimg.cc/jqDWN8BC/Peek-2020-03-24-19-00.gif)
+
+```typescript
+import * as Abyssal from 'abyssal';
+
+const GenNumber = new Abyssal.Tree('gennumber');
+
+// on 'message'
+GenNumber.on('message', util => {
+	const { args: [message] } = util;
+    // If the author is not a bot & content is 'generate number'
+	if (!message.author.bot && message.content === 'generate number') {
+        // Execute the 'generateNumber' branch
+		util.execBranch('generateNumber');
+	}
+});
+
+// The 'generateNumber' branch
+GenNumber.branch('generateNumber', async util => {
+	const { args: [message] } = util;
+    // Generate the random number
+	const number = Math.round(Math.random() * 100);
+    // Store the data required in the local state
+	util.setStateProperty('number', number);
+	util.setStateProperty('user', message.author.id);
+	util.setStateProperty('channel', message.channel.id);
+	await util.saveState(); // Update the actual state
+    // Add a 'message' listener attached to 'showNumber' branch,
+    // meaning, every time a 'message' event is emitted in the client,
+    // the 'showNumber' branch will be executed with a relevant
+    // new Util instance
+	await util.addListener('message', 'showNumber');
+    // Send messages
+	await message.channel.send('Number generated!');
+	const content = 'Please respond with "show number" to see the generated number.';
+	message.channel.send(content);
+});
+
+// The 'showNumber' branch,
+// which is executed everytime 'message' event is emitted
+GenNumber.branch('showNumber', async util => {
+	const { args: [message] } = util;
+    // If the author is a bot, quit
+	if (message.author.bot) return;
+    // If the message is not 'show number'
+	if (message.content !== 'show number') {
+        // Send a message
+		message.channel.send('Number will not be shown.');
+        // Delete the state document
+		await util.deleteState();
+        // Delete all the listeners,
+        // meaning this branch won't be fired anymore
+		await util.removeAllListeners();
+        // And quit, ending the instance
+		return;
+	}
+    // Update the local state with the actual state
+	await util.loadState();
+    // If the message wasn't sent in the same channel as the number was
+    // generated in, quit
+	if (message.channel.id !== util.getStateProperty('channel')) return;
+    // If the author is not the same user that executed the command, quit
+	if (message.author.id !== util.getStateProperty('user')) return;
+    // Retrieve the generated number, which was previously stored under 'number'
+	const number = util.getStateProperty('number');
+    // Send the generated number
+	message.channel.send(`The number generated is ${number}`);
+    // Cleanup & quit, ending the instance
+	await util.deleteState();
+	await util.removeAllListeners();
+});
+
 export default GenNumber;
 ```
 
-This second example is of a `Trigger` which returns the result of a google search of the term entered until "exit" is sent, after "google search" was sent. This `Trigger` will make use of a imaginary function called `googleSearch` which is defined as `(searchTerm: string) => Promise<string>`. It will also ignore messages sent by other users.
+##### Example 2
 
-```
-User -> google search
- Bot -> Okay, please enter a search term.
-User -> Programming
- Bot -> TheResultOfTheProgrammingGoogleSearch
- Bot -> Okay, please enter another search term if you wish. To exit please enter 'exit'.
-Other User (Ignored) -> C++
-User -> Typescript
- Bot -> TheResultOfTheTypescriptGoogleSearch
- Bot -> Okay, please enter another search term if you wish. To exit please enter 'exit'.
-Other User (Ignored) -> C++
-User -> exit
- Bot -> Exited google search.
-```
+The example *below* is of a `Tree` which **sends a message, whose `description` is the current reactions**.
+
+![Example Usage](https://i.postimg.cc/pTSk9JPn/Peek-2020-03-24-17-50.gif)
 
 ```typescript
-import * as Abyssal from "abyssal";
+import * as Abyssal from 'abyssal';
+import DiscordJS from 'discord.js';
 
-const GoogleSearch = new Abyssal.Trigger({
-	id: "googlesearch",
-	events: ["message"],
-	eventListeners: ["message"], // ["message"] since we attach a Listener only to the "message" Event
-	validator: async (event, [message], util) => !message.author.bot && message.content == "google search",
-	executor: async (event, [message], util) => {
-		util.setStateProperty("user", message.author.id); // Set the user property in the local State
-		await util.saveState(); // Update the actual State
-		await util.addListener("message"); // Add the "message" Listener
-		await message.channel.send("Okay, please enter a search term.");
+const ReactMsg = new Abyssal.Tree('reactmsg');
+
+// on 'message'
+ReactMsg.on('message', util => {
+	const { args: [message] } = util;
+    // If the author is not a bot & the content is 'react message'
+	if (!message.author.bot && message.content === 'react message') {
+        // Execute the 'sendMessage' branch
+		util.execBranch('sendMessage');
 	}
 });
 
-// Listen to the "message" Event
-GoogleSearch.on("message", async ([message], util) => {
-	await util.loadState(); // Retrieve the actual State
-	// Ignore if the author's id is not equal to that of the "user" property in the State
-	if (message.author.id == util.getStateProperty("user")) {
-		if (message.content == "exit") {
-			await util.deleteState(); // Delete the State Document in the Database
-			await util.removeListener("message"); // Remove the "message" Listener
-			await message.channel.send("Exited google search.");
-		} else {
-			await message.channel.send(await googleSearch(message.content));
-			await message.channel.send("Okay, please enter another search term if you wish. To exit please enter 'exit'.");
-		}
-	}
+// The 'sendMessage' branch
+ReactMsg.branch('sendMessage', async util => {
+	const { args: [message] } = util;
+	const embed = new DiscordJS.MessageEmbed(); // Create embed
+    // Set the title & description
+	embed.setTitle('Reactions').setDescription('None.');
+    // Send the message
+	const msg = await message.channel.send(embed);
+    // Store the message id under the property 'message'
+	util.setStateProperty('message', msg.id);
+    // Update the actual state
+	await util.saveState();
+    // Add listeners to 'messageReactionAdd' & 'messageReactionRemove', both
+    // attached to the 'updateMessage' branch, meaning, 'updateMessage' branch
+    // will be executed whenever either event is emitted
+	await util.addListener('messageReactionAdd', 'updateMessage');
+	await util.addListener('messageReactionRemove', 'updateMessage');
 });
-	
-export default GoogleSearch;
+
+// The 'updateMessage' branch,
+// which is executed on 'messageReactionAdd' & 'messageReactionRemove'
+ReactMsg.branch('updateMessage', async util => {
+	const { args: [{ message }] } = util;
+	await util.loadState(); // Update the local state
+    // If the message's id is not equal to the message sent, quit
+	if (message.id !== util.getStateProperty('message')) return;
+    // Extract all the reactions on the message
+	type Reactions = DiscordJS.Collection<string, DiscordJS.MessageReaction>;
+	const reactions: Reactions = message.reactions.cache;
+	let desc = 'None.'; // Set description to 'None.' by default
+    // If there are any reactions
+	if (reactions.size > 0) {
+		const mapper = (reaction: DiscordJS.MessageReaction) => {
+			const expression = `${reaction.count} x ${reaction.emoji}`;
+			return expression;
+		};
+        // Map each reaction into the expression & join all the strings
+		desc = reactions.map(mapper).join('\n');
+	}
+	const embed = new DiscordJS.MessageEmbed(); // Create embed
+   	// Set title & description
+	embed.setTitle('Reactions').setDescription(desc);
+    // Edit the message
+	message.edit(embed);
+});
+
+export default ReactMsg;
 ```
 
-The third, & final, example is the most complicated example by far. This `Trigger` will do a `+`, `-`, `*` or a `/` operation on two numbers. The `Trigger` first prompts the user for the first & second number, the input is taken through reactions, by making the user react to numbered emojis. Then the trigger prompts for the operation to be done on the numbers. (without reactions) The `Trigger` then calculates the result & returns the answer. This entire process is triggered when the user sends `"calculate"`.
+##### Example 3
 
-```
-User -> calculate
-Bot -> Please react on the first number.
-Bot (Reactions) -> 1️⃣, 2️⃣, 3️⃣, 4️⃣, 5️⃣
-User (Reacted) -> 2
-Bot -> Please react on the second number.
-Bot (Reactions) -> 1️⃣, 2️⃣, 3️⃣, 4️⃣, 5️⃣
-User (Reacted) -> 5
-Bot -> What operation do you wish to do on these two numbers? (+, -, *, /)
-User -> *
-Bot -> 10 is the answer.
-```
+The final example *below*, is of a ***"upgraded"* `Tree` from the *Example 3* under *Example Usage - Tree***. This `Tree` **can handle multiple operations**, namely, *addition, subtraction, multiplication & division*. **The numbers are inputted *through* reactions.**
+
+![Example Usage](https://i.postimg.cc/hv633C0K/Peek-2020-03-24-18-55.gif)
 
 ```typescript
-import * as Abyssal from "abyssal";
+import * as Abyssal from 'abyssal';
 
-const emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"];
-const operations = ["+", "-", "*", "/"];
+const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣']; // The number emojis
+const operations = ['+', '-', '*', '/']; // The operations
 
-const Calculate = new Abyssal.Trigger({
-	id: "calculate",
-	events: ["message"],
-	// ["message", "messageReactionAdd"] since both events are being listened to
-	eventListeners: ["message", "messageReactionAdd"],
-	validator: async (event, [message], util) => !message.author.bot && message.content == "calculate",
-	executor: async (event, [message], util) => {
-		const msg = await message.channel.send("Please react on the first number.");
-		util.setStateProperty("user", message.author.id); // Set the user property in the local State
-		util.setStateProperty("message", msg.id); // Set the message property in the local State
-		util.setStateProperty("first", true); // Set the "first" flag in the local State to true
-		await util.saveState(); // Update the actual State
-		await util.addListener("messageReactionAdd"); // Add the "messageReactionAdd" Listener
-		// React to the message sent with the emojis
-		for (const emoji of emojis) {
-			await msg.react(emoji);
-		}
+const Calculate = new Abyssal.Tree('calculate');
+
+Calculate.on('message', util => {
+	const { args: [message] } = util;
+    // If the author is not a bot & content is 'calculate'
+	if (!message.author.bot && message.content === 'calculate') {
+        // Execute the 'execute' branch
+		util.execBranch('execute');
 	}
 });
 
-// Listen to the "messageReactionAdd" Event
-Calculate.on("messageReactionAdd", async ([reaction, user], util) => {
-	await util.loadState(); // Retrieve the actual State
-	// Check if the user's id is equal to that of the "user" property in the local State
-	// and if the reaction.message's id is equal to that of the "message" property in the local State
-	if (user.id == util.getStateProperty("user") && reaction.message.id == util.getStateProperty("message")) {
-		// Get the index of the emoji reacted in the emoji array
-		const idx = emojis.findIndex(emoji => emoji == reaction.emoji.toString());
-		if (idx != -1) {
-			if (util.getStateProperty("first")) {
-				// Initiate the second reaction input
-				const msg = await reaction.message.channel.send("Please react on the second number.");
-				util.setStateProperty("message", msg.id);
-				util.setStateProperty("first", false); // Set the "first" flag to false
-				util.setStateProperty("num1", idx + 1); // Set "num1" to the first input
-				await util.saveState();
-				for (const emoji of emojis) {
-					await msg.react(emoji);
-				}
-			} else {
-				// Initiate the operation prompt
-				await reaction.message.channel.send("What operation do you wish to do on these two numbers? (+, -, *, /)");
-				// Remove unnecessary data
-				util.deleteStateProperty("message"); // 
-				util.deleteStateProperty("first");
-				util.setStateProperty("num2", idx + 1); // Set "num2" to the second input
-				util.setStateProperty("channel", reaction.message.channel.id); // Set "channel" to the channel that the message was sent on
-				await util.removeListener("messageReactionAdd"); // Remove the "messageReactionAdd" Listener
-				await util.addListener("message"); // Add the "message" Listener
-				await util.saveState();
-			}
-		}
-	}
+// The 'execute' branch
+Calculate.branch('execute', async util => {
+	const { args: [message] } = util;
+    // Send message
+	const msg = await message.channel.send('Please react to the first number.');
+    // Store the user & message ids
+	util.setStateProperty('user', message.author.id);
+	util.setStateProperty('message', msg.id);
+	await util.saveState(); // Update the actual state
+    // Add 'messageReactionAdd' listener, attached to 'inputOne'
+	await util.addListener('messageReactionAdd', 'inputOne');
+    // Add the reactions,
+    // the reactions are the last actions being done because
+    // incase the user reacts to the first reaction before the others
+    // have yet to be reacted on, the listener & state are already in place
+    // waiting for a reaction
+	for (const emoji of emojis) await msg.react(emoji);
 });
 
-Calculate.on("message", async ([message], util) => {
-	await util.loadState(); // Retrieve the actual State
-	// Check if the channel id is equal to the "channel" state property
-	// and if the author's id is equal to the "user" state property
-	if (message.channel.id == util.getStateProperty("channel") && message.author.id == util.getStateProperty("user")) {
-		// Find the index of the operation entered in the operations array
-		const idx = operations.findIndex(operation => operation == message.content);
-		if (idx != -1) {
-			// Calculate the answer
-			let answer = util.getStateProperty("num1");
-			switch (operations[idx]) {
-				case "+":
-					answer += util.getStateProperty("num2");
-					break;
-				case "-":
-					answer -= util.getStateProperty("num2");
-					break;
-				case "*":
-					answer *= util.getStateProperty("num2");
-					break;
-				case "/":
-					answer /= util.getStateProperty("num2");
-					break;
-					
-			}
-			// Send the answer
-			await message.channel.send(`${answer} is the answer.`);
-			// Clean up
-			await util.deleteState();
-			await util.removeListener("message");
-		} else {
-			// Send error message
-			await message.channel.send("Invalid operation.");
-		}
-	}
+// The 'inputOne' branch,
+// which is executed everytime 'messageReactionAdd' event is emitted
+Calculate.branch('inputOne', async util => {
+	const { args: [reaction, user] } = util;
+	const message = reaction.message; // Extract the message
+    // If the user is a bot, quit
+	if (user.bot) return;
+	await util.loadState(); // Update the local state
+    // If the user id isn't equal to that of the original user, quit
+	if (user.id === util.getStateProperty('user')) return;
+    // If the message id isn't equal to that of the original message, quit
+	if (message.id === util.getStateProperty('message')) return;
+    // Find the index of the reacted emoji in the array
+	const idx = emojis.findIndex(emoji => emoji === reaction.emoji.toString());
+    // If the index is -1, that means the array doesn't include the reacted emoji,
+    // so it must've not been a number sent by the bot, so quit
+	if (idx === -1) return;
+    // Send message
+	const msg = await message.channel.send('Please react to the second number.');
+    // Update the message id & store the input
+	util.setStateProperty('message', msg.id);
+	util.setStateProperty('inputOne', idx + 1);
+	await util.saveState(); // Update the actual state
+    // Change the listener from the 'inputOne' branch to 'inputTwo'
+	await util.removeListener('messageReactionAdd', 'inputOne');
+	await util.addListener('messageReactionAdd', 'inputTwo');
+    // Add the reactions,
+    // it's at the bottom for the same reason as before
+	for (const emoji of emojis) await msg.react(emoji);
 });
-	
+
+// The 'inputTwo' branch,
+// which is executed everytime 'messageReactionAdd' event is emitted
+Calculate.branch('inputTwo', async util => {
+	const { args: [reaction, user] } = util;
+	const message = reaction.message; // Extract the message
+    // If the user is a bot, quit
+	if (user.bot) return;
+	await util.loadState(); // Update the local state
+    // If the user id isn't equal to that of the original user, quit
+	if (user.id !== util.getStateProperty('user')) return;
+    // If the message id isn't equal to that of the original message, quit
+	if (message.id !== util.getStateProperty('message')) return;
+    // Find the index of the reacted emoji in the array
+	const idx = emojis.findIndex(emoji => emoji === reaction.emoji.toString());
+    // If the index is -1, quit
+	if (idx === -1) return;
+    // Send message
+	const content = 'Please send the operation to be done on these two numbers. (+, -, *, /)';
+	message.channel.send(content);
+    // Delete the unnecessary message id data
+	util.deleteStateProperty('message');
+    // Store the second input & store the channel id
+	util.setStateProperty('inputTwo', idx + 1);
+	util.setStateProperty('channel', message.channel.id);
+	await util.saveState(); // Update the actual state
+    // Remove the 'messageReactionAdd' listener attached to 'inputTwo'
+	await util.removeListener('messageReactionAdd', 'inputTwo');
+    // Add a 'message' listener attached to 'inputThree'
+	await util.addListener('message', 'inputThree');
+});
+
+// The 'inputThree' branch,
+// which is executed everytime 'message' event is emitted
+Calculate.branch('inputThree', async util => {
+	const { args: [message] } = util;
+    // If the author is a bot, quit
+	if (message.author.bot) return;
+	await util.loadState(); // Update the local state
+    // If the channel id is not equal to that of the one the previous message
+    // was sent on, quit
+	if (message.channel.id !== util.getStateProperty('channel')) return;
+    // If the author id isn't equal to that of the original user, quit
+	if (message.author.id !== util.getStateProperty('user')) return;
+    // Find the index of the message in the array
+	const idx = operations.findIndex(operation => operation === message.content);
+    // If the index is -1, the message sent wasn't a operation, so send a error
+	if (idx === -1) return message.channel.send('Invalid operation.');
+    // Retrieve both inputs
+	const input1 = util.getStateProperty('inputOne');
+	const input2 = util.getStateProperty('inputTwo');
+	let answer = input1;
+    // Apply the operation, selected by the user, to answer
+	switch (idx) {
+		case 0: answer += input2; break;
+		case 1: answer -= input2; break;
+		case 2: answer *= input2; break;
+		case 3: answer /= input2; break;
+	}
+    // Send the message
+    const expression = `${input1} ${operations[idx]} ${input2}`;
+	message.channel.send(`Answer is ${answer}. (${expression})`);
+    // Cleanup & quit, ending the instance
+	await util.deleteState();
+	await util.removeListener('message', 'inputThree');
+});
+
 export default Calculate;
 ```
 
-**Instances**
+### Manager - `new Manager(debugUtil?: boolean)`
 
-When you look at the code of the `Trigger`s in the examples given above, you only see one *instance* of the `Trigger`. You only see the code for the `Trigger` that's being ran once. However, in reality, there can be many *instances* of the same `Trigger` running simultaneously, all, possibly, having different `State`s, `Session`s & `Listener`s & being at different *stages* in the process of execution. For example, let's look at some *instances* of the `GenNumber` `Trigger`.
-```typescript
-Instance 1 - Stage of Execution: Validation
-			            Session: "gennumber-687418"
-			              State: * none *
-			          Listeners: * none *
-			          
-Instance 2 - Stage of Execution: Showing Number
-			            Session: "gennumber-168484"
-			              State: * deleted *
-			          Listeners: * removed *
-			          
-Instance 3 - Stage of Execution: Generated Number
-			            Session: "gennumber-789134"
-			              State: * number = 34 set & saved *
-			          Listeners: * "message" added *
-```
+​	This component **manages how `event`s emitted by the `Client` are handled**, aka, how `Tree`s are executed. **Whenever *any* `event` is emitted, the `Client` calls the `Manager.eventHandler` method**, with the appropriate `argument`s.
 
-With this knowledge, you can truly understand what `State`s, `Session`s,  `Listener`s & being at different *stages* in the process of execution mean.
-
-## Job - `new Abyssal.Job(JobID, Event[], JobExecutor)`
-
-The `Job` class, in a nutshell, is a simplified `Trigger` class. `Job`s don't have validation, sessions or even state, therefore no, default, access to a instance of the `Util` class. They are meant to handle background jobs, like collecting statistics, sending welcome messages, logging etc. They are always executed after `Trigger`s, so, they have the ability to see which `Trigger`/s went off (their `TriggerExecutor` executed).
-
-**Definition**
+#### Interface
 
 ```typescript
-type JobID = string;
-type JobExecutor = (event: Event, args: EventArgs, triggers: Trigger[], database: Database) => Promise<void>;
+interface Manager {
+    addTree: (tree: Tree) => void;
+    removeTree: (id: TreeID) => void;
+    eventHandler: (config: EventHandlerConfig) => Promise<void>;
+}
 
-interface Job {
-	id: JobID; // A unique string identifier
-	events: Event[]; // All the events for the JobExecutor to be executed on
-	execute: JobExecutor; // The JobExecutor function
+interface EventHandlerConfig {
+    event: string | symbol;
+    args: any[];
+    database: Database;
+    client: Client;
 }
 ```
 
-**Example Usage**
+#### Functionality - `Manager Interface`
 
-The `Job` below keeps track of how many times the `Trigger` with the `TriggerID` `"ping"` went off, & logs it every 5 times executed.
+|     Method     | Function                                                     |
+| :------------: | ------------------------------------------------------------ |
+|   `addTree`    | **Enables the provided  `Tree`** to be executed.             |
+|  `removeTree`  | **Disables the  `Tree`, with the provided ID**, to be executed. (*No error* is thrown if a `Tree` with the provided ID is *not found*) |
+| `eventHandler` | **The method which is called on *every* `event` emission.**  |
+
+#### Functionality - `EventHandlerConfig Interface`
+
+|  Property  | Function                                                     |
+| :--------: | ------------------------------------------------------------ |
+|  `event`   | **The `event`** emitted.                                     |
+|   `args`   | **The `argument`s** provided by the `event`.                 |
+| `database` | **The `Database` component** provided to the `Client`, *on initialization*. |
+|  `client`  | **The `Client`** which the `event` was *emitted on*.         |
+
+#### Example Extension
 
 ```typescript
-import * as Abyssal from "abyssal";
+import * as Abyssal from 'abyssal';
+import uniqid from 'uniqid';
 
-let pingCount = 0;
+export class Manager extends Abyssal.Manager {
+	private readonly allTrees: Abyssal.Tree[] = []; // Contains all the trees
 
-const PingCounter = new Abyssal.Job("pingcounter", ["message"], async (event, args, triggers, database) => {
-	if (triggers.some(trigger => trigger.id == "ping")) {
-		pingCount++;
-		if (pingCount % 5 == 0) console.log(`Ping trigger has been ran ${pingCount} times!`);
+	public constructor(private readonly debugMode?: boolean) {
+		super(debugMode);
 	}
-});
 
-export default PingCounter;
-```
+    // Push the tree into the array
+	public addTree(tree: Abyssal.Tree) {
+		this.allTrees.push(tree);
+	}
 
-## Trigger Manager - `new Abyssal.TriggerManager()`
+    // Splice the tree out of the array
+	public removeTree(id: Abyssal.TreeID) {
+		const idx = this.allTrees.findIndex(e => e.id === id);
+		this.allTrees.splice(idx, 1);
+	}
 
-This class manages all the `Trigger`s. Specifically, how they are being executed, including the `TriggerValidator`s & the `Listener`s.
-
-**Definition**
-
-```typescript
-interface TriggerManager {
-	add: (trigger: Trigger) => void;
-	remove: (id: TriggerID) => void;
-	eventHandler: (event: Event, args: EventArgs, database: Database) => Promise<Trigger[]>;
-}
-```
-
-| Method   | Function                                                                                           |
-| -------- | -------------------------------------------------------------------------------------------------- |
-| `add`    | Adds a `Trigger` to a collection of `Trigger`s which may be executed                               |
-| `remove` | Removes a `Trigger` from the collection, making it unable to be executed                           |
-| `event`  | All emitted `Event`s are fed in to this method. It returns all the `Trigger`s which were executed. |
-
-**Example Implementation (Default Implementation)**
-
-```typescript
-import * as Abyssal from "abyssal";
-import uniqid from "uniqid";
-
-class TriggerManager extends Abyssal.TriggerManager {
-
-	private triggers: Abyssal.Trigger[] = []; // Contains all the Triggers
-	// Contains all the eventListeners of all the Triggers, without duplicates
-	private eventListeners: string[] = [];
-	// Contains all the Triggers grouped by their events
-	private groupedTriggers: { [key: string]: Abyssal.Trigger[] } = {};
-
-	add(trigger: Abyssal.Trigger) {
-		// Push the Trigger in to this.triggers
-		this.triggers.push(trigger);
-		// Reset this.eventListeners & this.groupedTriggers
-		this.eventListeners = [];
-		this.groupedTriggers = {};
-		// Goes through all the Triggers in this.triggers
-		this.triggers.forEach(trig => {
-			// Goes through all the listeners in trig.eventListeners and
-			// adds listeners, which are not included in this.eventListeners, to this.eventListeners
-			trig.eventListeners.forEach(listener => !this.eventListeners.includes(listener.toString()) && this.eventListeners.push(listener.toString()));
-			// Goes through all the events in trig.events
-			trig.events.forEach(event => {
-				event = event.toString();
-				// If this.groupedTriggers has the property event then
-				// push trig in to that list
-				if (this.groupedTriggers.hasOwnProperty(event)) this.groupedTriggers[event].push(trig);
-				// Else define the property in this.groupedTriggers
-				else this.groupedTriggers[event] = [trig];
-			});
+	public async eventHandler(config: Abyssal.EventHandlerConfig) {
+		const { event, args, database, client } = config;
+        // Get all the listeners attached to the current event
+		const eventList = await database.find({
+			type: 'listener',
+			event: event.toString()
+		}) as Abyssal.Listener[];
+        // For each listener, if any,
+		eventList.forEach(e => {
+            // Find the corresponding tree
+			const tree = this.allTrees.find(trig => e.session.startsWith(trig.id));
+			// And execute the corresponding branch
+            tree?.execBranch(e.branch, new Abyssal.Util({
+				tree,
+				branchID: e.branch,
+				event,
+				args,
+				session: e.session,
+				database,
+				client
+			}, this.debugMode));
 		});
+		// Create a session for each tree, using uniqid, & emit it
+		this.allTrees.forEach(tree => tree.emit(event, new Abyssal.Util({
+			tree,
+			branchID: false,
+			event,
+			args,
+			session: uniqid(`${tree.id}-`),
+			database,
+			client
+		}, this.debugMode)));
 	}
-
-	remove(id: Abyssal.TriggerID) {
-		// Splice the Trigger, which the provided ID belongs to, out of the array
-		const idx = this.triggers.findIndex(e => e.id == id);
-		this.triggers.splice(idx, 1);
-		// Reset this.eventListeners & this.groupedTriggers
-		this.eventListeners = [];
-		this.groupedTriggers = {};
-		// Goes through all the Triggers in this.triggers
-		this.triggers.forEach(trig => {
-			// Goes through all the listeners in trig.eventListeners and
-			// adds listeners, which are not included in this.eventListeners, to this.eventListeners
-			trig.eventListeners.forEach(listener => !this.eventListeners.includes(listener.toString()) && this.eventListeners.push(listener.toString()));
-			// Goes through all the events in trig.events
-			trig.events.forEach(event => {
-				event = event.toString();
-				// If this.groupedTriggers has the property event then
-				// push trig in to that list
-				if (this.groupedTriggers.hasOwnProperty(event)) this.groupedTriggers[event].push(trig);
-				// Else define the property in this.groupedTriggers
-				else this.groupedTriggers[event] = [trig];
-			});
-		});
-	}
-
-	async eventHandler(event: Abyssal.Event, args: Abyssal.EventArgs, database: Abyssal.Database) {
-		// If event.toString() is included in this.eventListeners,
-		// (Meaning there may, potentially, be some listeners attached to this event)
-		if (this.eventListeners.includes(event.toString())) {
-			// Retrieve any attached listeners
-			const eventList = await database.find({
-				type: "listener",
-				event: event.toString()
-			});
-			// For each retrieved listener (if any)
-			eventList.forEach(e => {
-				// Find the Trigger which attached the listener
-				const trigger = this.triggers.find(trig => e.session.startsWith(trig.id));
-				// And run the eventHandler method on it
-				trigger?.eventHandler(event, args, new Util(trigger.id, e.session, database));
-			});
-		}
-		// If this.groupedTriggers has a property of event.toString()
-		// (Meaning there may, potentially, be some TriggerValidators which return true)
-		if (this.groupedTriggers.hasOwnProperty(event.toString())) {
-			// Generate the sessions (using uniqid)
-			let sessions: Abyssal.TriggerSession[] = this.groupedTriggers[event.toString()].map(trig => uniqid(`${trig.id}-`));
-			// Run the TriggerValidators
-			const promises = this.groupedTriggers[event.toString()].map((trig, i) => trig.validate(event, args, new Util(trig.id, sessions[i], database)));
-			const resolved = await Promise.all(promises);
-			// This array will hold all the Triggers whose TriggerValidator returned true (if any)
-			const executed: Abyssal.Trigger[] = [];
-			// Go through each TriggerValidator result
-			resolved.forEach((res, i) => {
-				// If it's true
-				if (res == true) {
-					// Find the corresponding Trigger
-					const trigger = this.groupedTriggers[event.toString()][i];
-					// Push it to the executed array
-					executed.push(trigger);
-					// & execute it
-					trigger.execute(event, args, new Util(trigger.id, sessions[i], database));
-				}
-			});
-			// Return the executed array
-			return executed;
-		}
-		// Return a empty array, since no TriggerExecutors were executed
-		return [];
-	}
-}
-
-export default TriggerManager;
-```
-
-## Job Manager - `new Abyssal.JobManager()`
-
-The `JobManager` class is the `TriggerManager` class, but for managing `Job`s, instead of `Trigger`s.
-
-**Definition**
-
-```typescript
-interface JobManager {
-	add: (job: Job) => void;
-	remove: (id: JobID) => void;
-	eventHandler: (event: Event, args: EventArgs, triggers: Trigger[], database: Database) => Promise<void>;
 }
 ```
 
-| Method   | Function                                                                    |
-| -------- | --------------------------------------------------------------------------- |
-| `add`    | Adds a `Job` to a collection of `Job`s which may be executed                |
-| `remove` | Removes a `Job` from the collection, making it unable to be executed        |
-| `event`  | All emitted `Event`s are fed in to this method, after the `TriggerManager`. |
+### Client - `new Client(config: ClientConfig)`
 
-**Example Implementation (Default Implementation)**
+​	This is the *final* component that is exported in the framework, it **brings together the `Manager` & `Database` to form a instance of your Discord bot**. It **extends `DiscordJS.Client`**, so all the properties & methods of `Client` still apply.
 
-```typescript
-import * as Abyssal from "abyssal";
-
-class JobManager extends Abyssal.JobManager {
-
-	// Contains all the Jobs
-	private jobs: Abyssal.Job[] = [];
-
-	add(job: Abyssal.Job) {
-		// Pushes the Job in to this.jobs
-		this.jobs.push(job);
-	}
-
-	remove(id: Abyssal.JobID) {
-		// Splices the Job out of this.jobs
-		const idx = this.jobs.findIndex(e => e.id == id);
-		this.jobs.splice(idx, 1);
-	}
-
-	async eventHandler(event: Abyssal.Event, args: Abyssal.EventArgs, triggers: Abyssal.Trigger[], database: Abyssal.Database) {
-		// Go through all the Jobs
-		this.jobs.forEach(job => {
-			// If job.events includes event
-			if (job.events.includes(event)) {
-				// Then run the JobExecutor
-				job.execute(event, args, triggers, database);
-			}
-		});
-	}
-}
-
-export default JobManager;
-```
-
-## Client - `new Abyssal.Client(ClientConfig)`
-
-And finally, the `Client`, the class which makes all of the above components work together to make your discord bot. The `Client` manages the `Database`, `TriggerManager` and `JobManager`. It extends the `Discord.js` [`Client`](https://discord.js.org/#/docs/main/stable/class/Client).
-
-**Definition**
+#### Interface
 
 ```typescript
 interface Client extends DiscordJS.Client {
-	config: ClientConfig;
-	database: Database;
-	triggerManager: TriggerManager;
-	clientOptions?: DiscordJS.ClientOptions;
+    database: Database;
+    manager: Manager;
 }
-```
-**Config**
 
-```typescript
 interface ClientConfig {
-	database: Database,
-	triggerManager: TriggerManager,
-	jobManager: JobManager,
-	clientOptions?: DiscordJS.ClientOptions
+    database: Database;
+    manager: Manager;
+    clientOptions?: DiscordJS.ClientOptions;
 }
 ```
 
-**Example Implementation (Default Implementation)**
+#### Functionality - `Client Interface`
+
+|  Property  | Function                                         |
+| :--------: | ------------------------------------------------ |
+| `database` | **The `Database`** provided *on initialization*. |
+| `manager`  | **The `Manager`** provided *on initialization*.  |
+
+#### Functionality - `ClientConfig Interface`
+
+|    Property     | Function                                                     |
+| :-------------: | ------------------------------------------------------------ |
+|   `database`    | **The `Database`** to use to *store data*.                   |
+|    `manager`    | **The `Manager`** to use to call when *`event`s are emitted*. |
+| `clientOptions` | **Options for the `DiscordJS.Client`.**                      |
+
+#### Example Extension
 
 ```typescript
-import * as Abyssal from "abyssal";
-import DiscordJS from "discord.js";
+import * as Abyssal from 'abyssal';
+import DiscordJS from 'discord.js';
 
-class Client extends Abyssal.Client {
-
+export class Client extends Abyssal.Client {
 	public database: Abyssal.Database;
-	public triggerManager: Abyssal.TriggerManager;
-	public jobManager: Abyssal.JobManager;
-
-	constructor(public config: Abyssal.ClientConfig) {
-		super(config.clientOptions);
+	public manager: Abyssal.Manager;
+	public constructor(config: {
+		database: Abyssal.Database;
+		manager: Abyssal.Manager;
+		clientOptions?: DiscordJS.ClientOptions;
+	}) {
+		super(config);
 		this.database = config.database;
-		this.triggerManager = config.triggerManager;
-		this.jobManager = config.jobManager;
+		this.manager = config.manager;
 	}
-
-	emit(event: Abyssal.Event, ...args: Abyssal.EventArgs) {
-		// On any event emission, fire the this.fireManagers method
-		this.fireManagers(event, args);
+	
+    // Call the Client.manager.eventHandler method on every emission
+	public emit(event: string | symbol, ...args: any[]) {
+		this.manager.eventHandler({
+			event,
+			args,
+			database: this.database,
+			client: this
+		});
 		return super.emit(event, ...args);
 	}
 
-	private async fireManagers(event: Abyssal.Event, args: Abyssal.EventArgs) {
-		// Fires the TriggerManager & then JobManager
-		const triggers = await this.config.triggerManager.eventHandler(event, args, this.config.database);
-		this.config.jobManager.eventHandler(event, args, triggers, this.config.database)
-	}
-
-	async login(token: string) {
-		// Runs the initialize method of the Database
-		await this.config.database.initialize();
-		// Then logs in
+    // Call Client.database.initialize method before logging in
+	public async login(token: string) {
+		await this.database.initialize();
 		return super.login(token);
 	}
 }
+```
 
-export default Client;
+#### Example Usage
+
+*Assuming all the above `Tree` examples are inside of `./Examples/`*, the example *below* would **import all of them, add them to the `Manager` & then initialize the `Client` with them**.
+
+```typescript
+import * as Abyssal from 'abyssal';
+// Import all the trees
+import Ping from './Examples/Ping';
+import JoinLeaveMsg from './Examples/JoinLeaveMsg';
+import Add from './Examples/Add';
+import GenNumber from './Examples/GenNumber';
+import ReactMsg from './Examples/ReactMsg';
+import Calculate from './Examples/Calculate';
+
+const manager = new Abyssal.Manager(); // Initialize the manager
+// Add all the trees to the manager
+manager.addTree(Ping);
+manager.addTree(JoinLeaveMsg);
+manager.addTree(Add);
+manager.addTree(GenNumber);
+manager.addTree(ReactMsg);
+manager.addTree(Calculate);
+
+// Initialize the client
+const client = new Abyssal.Client({ database: new Abyssal.Database(), manager });
+// Login
+client.login('secret token');
+// On ready, log to the console
+client.on('ready', () => console.log(`Client Logged In - ${client.user?.tag}`));
 ```

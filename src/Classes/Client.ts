@@ -1,35 +1,32 @@
-
-import * as Types from '../typings';
-import Database from './Database';
-import TriggerManager from './TriggerManager';
-import JobManager from './JobManager';
+import { Database } from './Database';
+import { Manager } from './Manager';
 import DiscordJS from 'discord.js';
 
-class Client extends DiscordJS.Client implements Types.ClientInterface {
+export class Client extends DiscordJS.Client {
 	public database: Database;
-	public triggerManager: TriggerManager;
-	public jobManager: JobManager;
-	public constructor(public config: Types.ClientConfig) {
+	public manager: Manager;
+	public constructor(config: {
+		database: Database;
+		manager: Manager;
+		clientOptions?: DiscordJS.ClientOptions;
+	}) {
 		super(config.clientOptions);
 		this.database = config.database;
-		this.triggerManager = config.triggerManager;
-		this.jobManager = config.jobManager;
+		this.manager = config.manager;
 	}
 
-	public emit(event: Types.Event, ...args: Types.EventArgs) {
-		this.fireManagers(event, args);
+	public emit(event: string | symbol, ...args: any[]) {
+		this.manager.eventHandler({
+			event,
+			args,
+			database: this.database,
+			client: this
+		});
 		return super.emit(event, ...args);
 	}
 
-	private async fireManagers(event: Types.Event, args: Types.EventArgs) {
-		const triggers = await this.config.triggerManager.eventHandler(event, args, this.config.database);
-		this.config.jobManager.eventHandler(event, args, triggers, this.config.database);
-	}
-
 	public async login(token: string) {
-		await this.config.database.initialize();
+		await this.database.initialize();
 		return super.login(token);
 	}
 }
-
-export default Client;

@@ -1,40 +1,49 @@
-
-import * as Types from '../typings';
-
-let Data: Types.Document[] = [];
-
-function matchQuery(query: Types.Query, document: Types.Document): boolean {
-	const props = Object.keys(query);
-	let found = true;
-	props.forEach(prop => document[prop] === query[prop] || (found = false));
-	return found;
+export interface Document {
+	[key: string]: any;
 }
 
-class Database implements Types.DatabaseInterface {
-	// eslint-disable-next-line @typescript-eslint/no-empty-function
-	public async initialize() { }
+export interface Query {
+	[key: string]: any;
+}
 
-	public async find(query: Types.Query) {
+let Data: Document[] = [];
+
+function matchQuery(query: Query, document: Document): boolean {
+	const keys = Object.keys(query);
+	for (const key of keys) if (document[key] !== query[key]) return false;
+	return true;
+}
+
+export class Database {
+	// eslint-disable-next-line no-useless-constructor
+	public constructor(private readonly debug?: boolean) { }
+
+	public async initialize() { this.debug && console.log('Database --> Initialized'); }
+
+	public async find(query: Query) {
+		this.debug && console.log('Database --> Find', query);
 		return Data.filter(doc => matchQuery(query, doc));
 	}
 
-	public async findOne(query: Types.Query) {
-		return Data.filter(doc => matchQuery(query, doc))[0];
+	public async findOne(query: Query) {
+		this.debug && console.log('Database --> Find One', query);
+		return Data.find(doc => matchQuery(query, doc));
 	}
 
-	public async update(query: Types.Query, document: Types.Document) {
+	public async update(query: Query, document: Document) {
+		this.debug && console.log('Database --> Update', query, document);
 		let updated = false;
 		Data = Data.map(doc => (matchQuery(query, doc) && ((updated = true) && document)) || doc);
 		if (!updated) Data.push(document);
 	}
 
-	public async insert(document: Types.Document) {
+	public async insert(document: Document) {
+		this.debug && console.log('Database --> Insert', document);
 		Data.push(document);
 	}
 
-	public async delete(query: Types.Query) {
+	public async delete(query: Query) {
+		this.debug && console.log('Database --> Delete', query);
 		Data = Data.filter(doc => !matchQuery(query, doc));
 	}
 }
-
-export default Database;
