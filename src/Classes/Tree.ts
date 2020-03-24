@@ -30,5 +30,6 @@ export class Tree extends EventEmitter {
 	public async execBranch(id: BranchID, util: Util) {
 		const branch = this.branches.find(branch => branch.id === id);
 		if (branch) await branch.method(util);
+		else throw new Error(`Branch does not exist - ${id}`);
 	}
 }

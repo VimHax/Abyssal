@@ -41,7 +41,6 @@ export class Util {
 		session: string;
 		database: Database;
 		client: Client;
-		execBranch: (branchID: string, util: Util) => Promise<void>;
 	}, private readonly debug?: boolean) {
 		this.treeID = config.tree.id;
 		this.branchID = config.branchID;

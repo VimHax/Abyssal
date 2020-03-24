@@ -5,7 +5,7 @@ import DiscordJS from 'discord.js';
 export class Client extends DiscordJS.Client {
 	public database: Database;
 	public manager: Manager;
-	public constructor(public config: {
+	public constructor(config: {
 		database: Database;
 		manager: Manager;
 		clientOptions?: DiscordJS.ClientOptions;
@@ -16,12 +16,17 @@ export class Client extends DiscordJS.Client {
 	}
 
 	public emit(event: string | symbol, ...args: any[]) {
-		this.config.manager.eventHandler(event, args, this.config.database, this);
+		this.manager.eventHandler({
+			event,
+			args,
+			database: this.database,
+			client: this
+		});
 		return super.emit(event, ...args);
 	}
 
 	public async login(token: string) {
-		await this.config.database.initialize();
+		await this.database.initialize();
 		return super.login(token);
 	}
 }

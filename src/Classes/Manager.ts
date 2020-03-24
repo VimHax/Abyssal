@@ -4,6 +4,13 @@ import { Tree, TreeID } from './Tree';
 import { Client } from './Client';
 import uniqid from 'uniqid';
 
+export interface EventHandlerConfig {
+	event: string | symbol;
+	args: any[];
+	database: Database;
+	client: Client;
+}
+
 export class Manager {
 	private readonly trees: Tree[] = [];
 
@@ -19,7 +26,8 @@ export class Manager {
 		this.trees.splice(idx, 1);
 	}
 
-	public async eventHandler(event: string | symbol, args: any[], database: Database, client: Client) {
+	public async eventHandler(config: EventHandlerConfig) {
+		const { event, args, database, client } = config;
 		const eventList = await database.find({
 			type: 'listener',
 			event: event.toString()
@@ -33,20 +41,17 @@ export class Manager {
 				args,
 				session: e.session,
 				database,
-				client,
-				execBranch: tree.execBranch
+				client
 			}, this.debugUtil));
 		});
-		const sessions: string[] = this.trees.map(tree => uniqid(`${tree.id}-`));
-		this.trees.forEach((tree, i) => tree.emit(event, new Util({
+		this.trees.forEach(tree => tree.emit(event, new Util({
 			tree,
 			branchID: false,
 			event,
 			args,
-			session: sessions[i],
+			session: uniqid(`${tree.id}-`),
 			database,
-			client,
-			execBranch: tree.execBranch
+			client
 		}, this.debugUtil)));
 	}
 }
