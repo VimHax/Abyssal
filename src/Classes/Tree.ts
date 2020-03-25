@@ -1,5 +1,8 @@
 import { Util } from './Util';
 import { EventEmitter } from 'events';
+import Debug from 'debug';
+
+const debug = Debug('abyssal:tree');
 
 export type TreeID = string;
 export type BranchID = string;
@@ -28,6 +31,7 @@ export class Tree extends EventEmitter {
 	}
 
 	public async execBranch(id: BranchID, util: Util) {
+		debug(`[ Tree: ${this.id} ] Execute Branch`, id);
 		const branch = this.branches.find(branch => branch.id === id);
 		if (branch) await branch.method(util);
 		else throw new Error(`Branch does not exist - ${id}`);

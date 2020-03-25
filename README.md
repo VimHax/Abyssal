@@ -1,4 +1,4 @@
-# Abyssal - 0.0.5 Alpha
+# Abyssal - 0.0.6 Alpha
 
 <p><a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/v/abyssal.svg?maxAge=3600" alt="NPM version" /></a>
     <a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/dt/abyssal.svg?maxAge=3600" alt="NPM downloads" /></a>
@@ -23,7 +23,7 @@ Simply run the following command to install Abyssal - `npm install discord.js ab
 
 ## Documentation
 
-### Database - `new Database(debug?: boolean)`
+### Database - `new Database()`
 
 ​	This *component* **abstracts** the **interaction between the bot & database** down to *6 simple methods*, *allowing* Abyssal to *interact with, virtually, any database imaginable*. The component, by *default*, stores data in *memory*, however, this can be changed by simply *extending* the component. Abyssal **stores `State` & `Listener` data** using this component, **by default**. (`State` & `Listener`s are elaborated under *Util* section in the documentation)
 
@@ -66,14 +66,14 @@ interface Database {
 
 #### Functionality
 
-|    Method    | Function                                                     |
-| :----------: | :----------------------------------------------------------- |
-| `initialize` | **Runs *any* code** which is **required** to **initialize** *the methods*, like creating the connection to the database, for example. This method is called *before* the `Client` logs in. |
-|    `find`    | **Returns** an **array of `Document`s**, *all* of which **match** the **`Query` object** provided. (**Empty array** if *none* of the `Document`s **match**) |
-|  `findOne`   | **Returns** *one* **`Document`** which **matches** the **`Query` object** provided. (**`undefined`** if *none* of the `Document`s **match**) |
+|    Method    | Function                                                                                                                                                                                                                    |
+| :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `initialize` | **Runs *any* code** which is **required** to **initialize** *the methods*, like creating the connection to the database, for example. This method is called *before* the `Client` logs in.                                  |
+|    `find`    | **Returns** an **array of `Document`s**, *all* of which **match** the **`Query` object** provided. (**Empty array** if *none* of the `Document`s **match**)                                                                 |
+|  `findOne`   | **Returns** *one* **`Document`** which **matches** the **`Query` object** provided. (**`undefined`** if *none* of the `Document`s **match**)                                                                                |
 |   `update`   | **Replaces** *all* the **`Document`s** which **match** the **`Query` object** *with* the **`Document` provided**. If there were *no* replacements, then the **provided `Document`** is **inserted** in to the **database**. |
-|   `insert`   | **Inserts** the **provided `Document`** in to the **database**. |
-|   `delete`   | **Deletes** *any* **`Document`** which **matches** the **`Query` object** provided. |
+|   `insert`   | **Inserts** the **provided `Document`** in to the **database**.                                                                                                                                                             |
+|   `delete`   | **Deletes** *any* **`Document`** which **matches** the **`Query` object** provided.                                                                                                                                         |
 
 #### Example Extension
 
@@ -146,9 +146,9 @@ interface Tree extends EventEmitter {
 | :------: | :------------------------------------------------------- |
 |   `id`   | A `string` which **uniquely** identifies *each* `Tree` . |
 
-|  **Method**  | Function                                                     |
-| :----------: | ------------------------------------------------------------ |
-|   `branch`   | **Defines** a `Branch` .                                     |
+|  **Method**  | Function                                                                                                                                                                                                            |
+| :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|   `branch`   | **Defines** a `Branch` .                                                                                                                                                                                            |
 | `execBranch` | **Finds** a **`Branch`** *with* the **provided `id`** & **calls** it's **`BranchMethod`** *with* the **provided `Util` instance** as it's *only* **argument**. Throws an **error** if a `Branch` was **not** found. |
 
 **All** the *other* properties have the **same** functionality as in the **`EventEmitter` class**.
@@ -317,7 +317,7 @@ Add.branch('execute', async util => {
 export default Add;
 ```
 
-### Util - `new Util(config: UtilConfig, debug?: boolean)`
+### Util - `new Util(config: UtilConfig)`
 
 ​	This component's **main purpose** is to **expose methods**, to the `Tree`, **which manipulate** it's **`State` & `Listener`s**. However, this component *also* contains properties, which expose the *current `event` name, the current `event` `arguments`, the `Client` which is executing the `Tree` etc*. The *below* explanations of `Session` & `Listener`s will probably be *confusing*, hopefully the *Example Usage* section will get rid of the confusion.
 
@@ -393,43 +393,43 @@ interface UtilConfig {
 
 #### Functionality - `Util Interface`
 
-|  Property   | Function                                                     |
-| :---------: | ------------------------------------------------------------ |
-|  `treeID`   | The **ID of the current `Tree`** being executed.             |
-| `branchID`  | The **ID of the current `Branch`,** `false` if currently *not* in a `Branch`. |
-|   `event`   | The *name* of the **current `event`**.                       |
-|   `args`    | The **`argument`s provided** by the `event`.                 |
-|  `session`  | The **current `Session`**.                                   |
-|   `state`   | **Local copy of the actual `State`**, *may be outdated*.     |
+|  Property   | Function                                                                           |
+| :---------: | ---------------------------------------------------------------------------------- |
+|  `treeID`   | The **ID of the current `Tree`** being executed.                                   |
+| `branchID`  | The **ID of the current `Branch`,** `false` if currently *not* in a `Branch`.      |
+|   `event`   | The *name* of the **current `event`**.                                             |
+|   `args`    | The **`argument`s provided** by the `event`.                                       |
+|  `session`  | The **current `Session`**.                                                         |
+|   `state`   | **Local copy of the actual `State`**, *may be outdated*.                           |
 | `listeners` | **Local copy of** *all* the **currently attached `Listener`s**, *may be outdated*. |
-| `database`  | **The `Database` component** provided to the `Client`, *on initialization*. |
-|  `client`   | **The `Client`** which is executing the `Tree`.              |
+| `database`  | **The `Database` component** provided to the `Client`, *on initialization*.        |
+|  `client`   | **The `Client`** which is executing the `Tree`.                                    |
 
-|        Method         | Function                                                     |
-| :-------------------: | ------------------------------------------------------------ |
-|     `execBranch`      | **Executes the `Branch` with the given ID**, throws an error if a `Branch` with the given ID *doesn't exist*. (**The same `Util` instance is passed down as the `argument`**) |
-|  `getStateProperty`   | **Returns the value of the property**, with the given name, **of the local `State`**. |
-|  `setStateProperty`   | **Sets the value of the property**, with the given name, to the given value, **of the local `State`**. |
-| `deleteStateProperty` | **Deletes the property**, with the given name, **off of the local `State`**. |
+|        Method         | Function                                                                                                                                                                                                      |
+| :-------------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+|     `execBranch`      | **Executes the `Branch` with the given ID**, throws an error if a `Branch` with the given ID *doesn't exist*. (**The same `Util` instance is passed down as the `argument`**)                                 |
+|  `getStateProperty`   | **Returns the value of the property**, with the given name, **of the local `State`**.                                                                                                                         |
+|  `setStateProperty`   | **Sets the value of the property**, with the given name, to the given value, **of the local `State`**.                                                                                                        |
+| `deleteStateProperty` | **Deletes the property**, with the given name, **off of the local `State`**.                                                                                                                                  |
 |      `loadState`      | **Finds the actual `State`**, in the database, **& replaces the local `State` with it**. If *not found*, a `State`, containing *only the properties defined by the `Interface`*, is set to the local `State`. |
-|      `saveState`      | **Updates the actual `State`** with the local `State`.       |
-|     `deleteState`     | **Deletes the `State`** document off of the database.        |
-|    `loadListeners`    | **Copies all the `Listeners`**, *stored in the database*, **to** the **`Util.listeners`** array. |
-|     `addListener`     | **Adds a new `Listener`** to the database, which is *attached* to the `event` & `BranchID` provided. |
-|   `removeListener`    | **Removes all `Listener`s** which are **_attached_ to the `event` & `BranchID`** provided. |
-| `removeAllListeners`  | **Removes all `Listener`s** *attached* to the current *instance*. |
+|      `saveState`      | **Updates the actual `State`** with the local `State`.                                                                                                                                                        |
+|     `deleteState`     | **Deletes the `State`** document off of the database.                                                                                                                                                         |
+|    `loadListeners`    | **Copies all the `Listeners`**, *stored in the database*, **to** the **`Util.listeners`** array.                                                                                                              |
+|     `addListener`     | **Adds a new `Listener`** to the database, which is *attached* to the `event` & `BranchID` provided.                                                                                                          |
+|   `removeListener`    | **Removes all `Listener`s** which are **_attached_ to the `event` & `BranchID`** provided.                                                                                                                    |
+| `removeAllListeners`  | **Removes all `Listener`s** *attached* to the current *instance*.                                                                                                                                             |
 
 #### Functionality - `UtilConfig Interface`
 
-|  Property  | Function                                                     |
-| :--------: | ------------------------------------------------------------ |
-|   `tree`   | **The `Tree`** to *bind* the `Util` instance to.             |
-| `branchID` | **The ID of the `Branch`** *currently* being executed, `false` is none. |
-|  `event`   | The *name* of the **`event` emitted**.                       |
-|   `args`   | **The `argument`s** provided by the `event`.                 |
-| `session`  | **The `Session`** to *bind* the `Util` instance to.          |
+|  Property  | Function                                                                    |
+| :--------: | --------------------------------------------------------------------------- |
+|   `tree`   | **The `Tree`** to *bind* the `Util` instance to.                            |
+| `branchID` | **The ID of the `Branch`** *currently* being executed, `false` is none.     |
+|  `event`   | The *name* of the **`event` emitted**.                                      |
+|   `args`   | **The `argument`s** provided by the `event`.                                |
+| `session`  | **The `Session`** to *bind* the `Util` instance to.                         |
 | `database` | **The `Database` component** provided to the `Client`, *on initialization*. |
-|  `client`  | **The `Client`** which is executing the `Tree`.              |
+|  `client`  | **The `Client`** which is executing the `Tree`.                             |
 
 #### Example Extension
 
@@ -883,20 +883,20 @@ interface EventHandlerConfig {
 
 #### Functionality - `Manager Interface`
 
-|     Method     | Function                                                     |
-| :------------: | ------------------------------------------------------------ |
-|   `addTree`    | **Enables the provided  `Tree`** to be executed.             |
+|     Method     | Function                                                                                                                               |
+| :------------: | -------------------------------------------------------------------------------------------------------------------------------------- |
+|   `addTree`    | **Enables the provided  `Tree`** to be executed.                                                                                       |
 |  `removeTree`  | **Disables the  `Tree`, with the provided ID**, to be executed. (*No error* is thrown if a `Tree` with the provided ID is *not found*) |
-| `eventHandler` | **The method which is called on *every* `event` emission.**  |
+| `eventHandler` | **The method which is called on *every* `event` emission.**                                                                            |
 
 #### Functionality - `EventHandlerConfig Interface`
 
-|  Property  | Function                                                     |
-| :--------: | ------------------------------------------------------------ |
-|  `event`   | **The `event`** emitted.                                     |
-|   `args`   | **The `argument`s** provided by the `event`.                 |
+|  Property  | Function                                                                    |
+| :--------: | --------------------------------------------------------------------------- |
+|  `event`   | **The `event`** emitted.                                                    |
+|   `args`   | **The `argument`s** provided by the `event`.                                |
 | `database` | **The `Database` component** provided to the `Client`, *on initialization*. |
-|  `client`  | **The `Client`** which the `event` was *emitted on*.         |
+|  `client`  | **The `Client`** which the `event` was *emitted on*.                        |
 
 #### Example Extension
 
@@ -906,10 +906,6 @@ import uniqid from 'uniqid';
 
 export class Manager extends Abyssal.Manager {
 	private readonly allTrees: Abyssal.Tree[] = []; // Contains all the trees
-
-	public constructor(private readonly debugMode?: boolean) {
-		super(debugMode);
-	}
 
     // Push the tree into the array
 	public addTree(tree: Abyssal.Tree) {
@@ -942,7 +938,7 @@ export class Manager extends Abyssal.Manager {
 				session: e.session,
 				database,
 				client
-			}, this.debugMode));
+			}));
 		});
 		// Create a session for each tree, using uniqid, & emit it
 		this.allTrees.forEach(tree => tree.emit(event, new Abyssal.Util({
@@ -953,7 +949,7 @@ export class Manager extends Abyssal.Manager {
 			session: uniqid(`${tree.id}-`),
 			database,
 			client
-		}, this.debugMode)));
+		})));
 	}
 }
 ```
@@ -986,11 +982,11 @@ interface ClientConfig {
 
 #### Functionality - `ClientConfig Interface`
 
-|    Property     | Function                                                     |
-| :-------------: | ------------------------------------------------------------ |
-|   `database`    | **The `Database`** to use to *store data*.                   |
+|    Property     | Function                                                      |
+| :-------------: | ------------------------------------------------------------- |
+|   `database`    | **The `Database`** to use to *store data*.                    |
 |    `manager`    | **The `Manager`** to use to call when *`event`s are emitted*. |
-| `clientOptions` | **Options for the `DiscordJS.Client`.**                      |
+| `clientOptions` | **Options for the `DiscordJS.Client`.**                       |
 
 #### Example Extension
 
@@ -1060,3 +1056,12 @@ client.login('secret token');
 // On ready, log to the console
 client.on('ready', () => console.log(`Client Logged In - ${client.user?.tag}`));
 ```
+
+## Debug Logs
+
+​	**Abyssal**'s *default* components **provide debug logs**, they **use the [debug](https://www.npmjs.com/package/debug) npm package** for logging. All the logs are under their respective names *below*.
+
+```
+abyssal, abyssal:client, abyssal:manager, abyssal:util, abyssal:tree, abyssal:database
+```
+

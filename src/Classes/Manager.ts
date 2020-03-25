@@ -3,6 +3,9 @@ import { Database } from './Database';
 import { Tree, TreeID } from './Tree';
 import { Client } from './Client';
 import uniqid from 'uniqid';
+import Debug from 'debug';
+
+const debug = Debug(`abyssal:manager`);
 
 export interface EventHandlerConfig {
 	event: string | symbol;
@@ -14,9 +17,6 @@ export interface EventHandlerConfig {
 export class Manager {
 	private readonly trees: Tree[] = [];
 
-	// eslint-disable-next-line no-useless-constructor
-	public constructor(private readonly debugUtil?: boolean) { }
-
 	public addTree(tree: Tree) {
 		this.trees.push(tree);
 	}
@@ -27,6 +27,7 @@ export class Manager {
 	}
 
 	public async eventHandler(config: EventHandlerConfig) {
+		debug(`Event handler method executed`);
 		const { event, args, database, client } = config;
 		const eventList = await database.find({
 			type: 'listener',
@@ -42,7 +43,7 @@ export class Manager {
 				session: e.session,
 				database,
 				client
-			}, this.debugUtil));
+			}));
 		});
 		this.trees.forEach(tree => tree.emit(event, new Util({
 			tree,
@@ -52,6 +53,6 @@ export class Manager {
 			session: uniqid(`${tree.id}-`),
 			database,
 			client
-		}, this.debugUtil)));
+		})));
 	}
 }

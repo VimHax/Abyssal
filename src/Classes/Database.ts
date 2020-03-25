@@ -1,3 +1,7 @@
+import Debug from 'debug';
+
+const debug = Debug('abyssal:database');
+
 export interface Document {
 	[key: string]: any;
 }
@@ -6,8 +10,6 @@ export interface Query {
 	[key: string]: any;
 }
 
-let Data: Document[] = [];
-
 function matchQuery(query: Query, document: Document): boolean {
 	const keys = Object.keys(query);
 	for (const key of keys) if (document[key] !== query[key]) return false;
@@ -15,35 +17,34 @@ function matchQuery(query: Query, document: Document): boolean {
 }
 
 export class Database {
-	// eslint-disable-next-line no-useless-constructor
-	public constructor(private readonly debug?: boolean) { }
+	private database: Document[] = [];
 
-	public async initialize() { this.debug && console.log('Database --> Initialized'); }
+	public async initialize() { debug('Initialized...'); }
 
 	public async find(query: Query) {
-		this.debug && console.log('Database --> Find', query);
-		return Data.filter(doc => matchQuery(query, doc));
+		debug('Find', query);
+		return this.database.filter(doc => matchQuery(query, doc));
 	}
 
 	public async findOne(query: Query) {
-		this.debug && console.log('Database --> Find One', query);
-		return Data.find(doc => matchQuery(query, doc));
+		debug('Find One', query);
+		return this.database.find(doc => matchQuery(query, doc));
 	}
 
 	public async update(query: Query, document: Document) {
-		this.debug && console.log('Database --> Update', query, document);
+		debug('Update', query, document);
 		let updated = false;
-		Data = Data.map(doc => (matchQuery(query, doc) && ((updated = true) && document)) || doc);
-		if (!updated) Data.push(document);
+		this.database = this.database.map(doc => (matchQuery(query, doc) && ((updated = true) && document)) || doc);
+		if (!updated) this.database.push(document);
 	}
 
 	public async insert(document: Document) {
-		this.debug && console.log('Database --> Insert', document);
-		Data.push(document);
+		debug('Insert', document);
+		this.database.push(document);
 	}
 
 	public async delete(query: Query) {
-		this.debug && console.log('Database --> Delete', query);
-		Data = Data.filter(doc => !matchQuery(query, doc));
+		debug('Delete', query);
+		this.database = this.database.filter(doc => !matchQuery(query, doc));
 	}
 }
