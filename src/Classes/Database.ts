@@ -2,49 +2,55 @@ import Debug from 'debug';
 
 const debug = Debug('abyssal:database');
 
-export interface Document { [key: string]: any }
-export interface Query { [key: string]: any }
-export interface Options { [key: string]: any }
-export interface FindOptions extends Options { single?: boolean }
-export interface UpdateOptions extends Options { upsert?: boolean }
+interface GenericObject {
+	[key: string]: any;
+}
 
-function matchQuery(query: Query, document: Document): boolean {
+export type Data = GenericObject;
+export type Query = GenericObject;
+export type Options = GenericObject;
+
+function matchQuery(query: Query, data: Data): boolean {
 	const keys = Object.keys(query);
-	for (const key of keys) if (document[key] !== query[key]) return false;
+	for (const key of keys) if (data[key] !== query[key]) return false;
 	return true;
 }
 
 export class Database {
-	private database: Document[] = [];
+	private database: Data[] = [];
 
-	public async initialize() { debug('Initialized'); }
+	public async initialize(): Promise<void> { debug('Initialized'); }
 
-	public async find(query: Query, options?: FindOptions) {
+	public async find(query: Query, options?: Options): Promise<Data[]> {
 		debug('Find', query, options);
-		if (options?.single) return this.database.find(doc => matchQuery(query, doc));
-		return this.database.filter(doc => matchQuery(query, doc));
+		return this.database.filter(d => matchQuery(query, d));
 	}
 
-	public async update(query: Query, document: Document, options?: UpdateOptions) {
-		debug('Update', query, document, options);
+	public async findOne(query: Query, options?: Options): Promise<Data | undefined> {
+		debug('Find One', query, options);
+		return this.database.find(d => matchQuery(query, d));
+	}
+
+	public async upsert(query: Query, data: Data, options?: Options): Promise<any> {
+		debug('Upsert', query, data, options);
 		let updated = false;
-		this.database = this.database.map(doc => {
-			if (matchQuery(query, doc)) {
+		this.database = this.database.map(d => {
+			if (matchQuery(query, d)) {
 				updated = true;
-				return document;
+				return data;
 			}
-			return doc;
+			return d;
 		});
-		if (!updated && options?.upsert) this.database.push(document);
+		if (!updated) this.database.push(data);
 	}
 
-	public async insert(document: Document, options?: Options) {
-		debug('Insert', document, options);
-		this.database.push(document);
+	public async insert(data: Data, options?: Options): Promise<any> {
+		debug('Insert', data, options);
+		this.database.push(data);
 	}
 
-	public async delete(query: Query, options?: Options) {
+	public async delete(query: Query, options?: Options): Promise<any> {
 		debug('Delete', query, options);
-		this.database = this.database.filter(doc => !matchQuery(query, doc));
+		this.database = this.database.filter(d => !matchQuery(query, d));
 	}
 }

@@ -1,6 +1,6 @@
-import { Database, Query, Document } from './Database';
-import { Tree } from './Tree';
-import { Client } from './Client';
+import { Database, Query, Data } from './Database';
+import { Tree, TreeID, BranchID } from './Tree';
+import { Client, Event, Args } from './Client';
 import Debug from 'debug';
 
 const debug = Debug('abyssal:util');
@@ -18,16 +18,26 @@ export interface Listener {
 	branch: string;
 }
 
-function matchQuery(query: Query, document: Document): boolean {
+export interface UtilConfig {
+	tree: Tree;
+	branchID: BranchID | false;
+	event: Event;
+	args: Args;
+	session: string;
+	database: Database;
+	client: Client;
+}
+
+function matchQuery(query: Query, data: Data): boolean {
 	const keys = Object.keys(query);
-	for (const key of keys) if (document[key] !== query[key]) return false;
+	for (const key of keys) if (data[key] !== query[key]) return false;
 	return true;
 }
 
 export class Util {
-	public treeID: string;
-	public branchID: string | false;
-	public event: string | symbol;
+	public treeID: TreeID;
+	public branchID: BranchID | false;
+	public event: Event;
 	public args: any[];
 	public session: string;
 	public state: State;
@@ -35,16 +45,7 @@ export class Util {
 	public database: Database;
 	public client: Client;
 	private readonly tree: Tree;
-
-	public constructor(config: {
-		tree: Tree;
-		branchID: string | false;
-		event: symbol | string;
-		args: any[];
-		session: string;
-		database: Database;
-		client: Client;
-	}) {
+	public constructor(config: UtilConfig) {
 		this.treeID = config.tree.id;
 		this.branchID = config.branchID;
 		this.event = config.event;
@@ -59,48 +60,48 @@ export class Util {
 		};
 	}
 
-	public execBranch(branchID: string) {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Execute branch`, branchID);
+	public execBranch(branchID: BranchID) {
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Execute branch`, branchID);
 		this.branchID = branchID;
 		return this.tree.execBranch(branchID, this);
 	}
 
 	public getStateProperty(property: string) {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Get state property`, property);
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Get state property`, property);
 		return this.state[property];
 	}
 
 	public setStateProperty(property: string, value: any) {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Set state property`, property, value);
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Set state property`, property, value);
 		this.state[property] = value;
 	}
 
 	public deleteStateProperty(property: string) {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Delete state property`, property);
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Delete state property`, property);
 		delete this.state[property];
 	}
 
 	public async loadState() {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Load state`);
-		this.state = (await this.database.find({
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Load state`);
+		this.state = (await this.database.findOne({
 			type: 'state',
 			session: this.session
-		}, { single: true })) as State || {
+		})) as State || {
 			type: 'state',
 			session: this.session
 		};
 	}
 
 	public saveState() {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Save state`);
-		return this.database.update({
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Save state`);
+		return this.database.upsert({
 			type: 'state',
 			session: this.session
-		}, this.state, { upsert: true });
+		}, this.state);
 	}
 
 	public deleteState() {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Delete state`);
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Delete state`);
 		return this.database.delete({
 			type: 'state',
 			session: this.session
@@ -108,15 +109,15 @@ export class Util {
 	}
 
 	public async loadListeners() {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Load listeners`);
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Load listeners`);
 		this.listeners = (await this.database.find({
 			type: 'listener',
 			session: this.session
 		})) as Listener[];
 	}
 
-	public async addListener(event: string | symbol, branchID: string) {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Add listener`, event, branchID);
+	public async addListener(event: Event, branchID: BranchID) {
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Add listener`, event, branchID);
 		const listener: Listener = {
 			type: 'listener',
 			event: event.toString(),
@@ -127,8 +128,8 @@ export class Util {
 		return this.database.insert(listener);
 	}
 
-	public async removeListener(event: string | symbol, branchID: string) {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Remove listener`, event, branchID);
+	public async removeListener(event: Event, branchID: BranchID) {
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Remove listener`, event, branchID);
 		const query: Query = {
 			event: event.toString(),
 			branch: branchID
@@ -140,7 +141,7 @@ export class Util {
 	}
 
 	public async removeAllListeners() {
-		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Remove all listeners`);
+		debug(`T: ${this.treeID} B: ${this.branchID} S: ${this.session} Remove all listeners`);
 		this.listeners = [];
 		return this.database.delete({ type: 'listener', session: this.session });
 	}

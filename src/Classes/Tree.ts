@@ -1,4 +1,5 @@
 import { Util } from './Util';
+import { Event } from './Client';
 import { EventEmitter } from 'events';
 import Debug from 'debug';
 
@@ -14,9 +15,9 @@ export interface Branch {
 }
 
 export interface Tree {
-	on: (event: string | symbol, listener: (util: Util) => void) => this;
-	once: (event: string | symbol, listener: (util: Util) => void) => this;
-	emit: (event: string | symbol, util: Util) => boolean;
+	on: (event: Event, listener: (util: Util) => void) => this;
+	once: (event: Event, listener: (util: Util) => void) => this;
+	emit: (event: Event, util: Util) => boolean;
 }
 
 export class Tree extends EventEmitter {
