@@ -5,8 +5,7 @@
     <a href="https://www.codacy.com/manual/VimHax/Abyssal?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=VimHax/Abyssal&amp;utm_campaign=Badge_Grade"><img src="https://api.codacy.com/project/badge/Grade/7b935d0d874d4aa5860e8722fc276036" alt="Codacy grade" /></a>
 <br>
 <a href="https://nodei.co/npm/abyssal/"><img src="https://nodei.co/npm/abyssal.png?downloads=true&stars=true" alt="npm installnfo" /></a>
-</p>
-
+</p>	
 ​	**Abyssal** is a *minimalist [Discord.js](https://discord.js.org/) framework*. It's **goal** is to make your Discord bot _**modular** & **elegant**_ in *nature*. Abyssal **divides** a typical Discord bot's functionality into **components**. All of these *components* can be *extended* to **add new or change existing functionality**. All of these components come together to *create a working Discord bot*. 
 
 > ​	I **highly recommended** you to **read the documentation** below, as Abyssal introduces **new concepts**, *which you may or may not have heard of before*, so that you can **be familiar with them & put them to use**.
@@ -21,7 +20,7 @@ Simply run the following command to install Abyssal - `npm install discord.js ab
 
 > `Discord.js` is a peer dependency which is required to make Abyssal run properly, so it is also installed in the above command.
 
-## Documentation
+## Documentation (Currently Outdated)
 
 ### Database - `new Database()`
 
@@ -58,7 +57,7 @@ interface Database {
 	initialize: () => Promise<void>;
 	find: (query: Query) => Promise<Document[]>;
 	findOne: (query: Query) => Promise<Document | undefined>;
-	update: (query: Query, document: Document) => Promise<void>;
+	upsert: (query: Query, document: Document) => Promise<void>;
 	insert: (document: Document) => Promise<void>;
 	delete: (query: Query) => Promise<void>;
 }
@@ -66,14 +65,14 @@ interface Database {
 
 #### Functionality
 
-|    Method    | Function                                                                                                                                                                                                                    |
-| :----------: | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `initialize` | **Runs *any* code** which is **required** to **initialize** *the methods*, like creating the connection to the database, for example. This method is called *before* the `Client` logs in.                                  |
-|    `find`    | **Returns** an **array of `Document`s**, *all* of which **match** the **`Query` object** provided. (**Empty array** if *none* of the `Document`s **match**)                                                                 |
-|  `findOne`   | **Returns** *one* **`Document`** which **matches** the **`Query` object** provided. (**`undefined`** if *none* of the `Document`s **match**)                                                                                |
-|   `update`   | **Replaces** *all* the **`Document`s** which **match** the **`Query` object** *with* the **`Document` provided**. If there were *no* replacements, then the **provided `Document`** is **inserted** in to the **database**. |
-|   `insert`   | **Inserts** the **provided `Document`** in to the **database**.                                                                                                                                                             |
-|   `delete`   | **Deletes** *any* **`Document`** which **matches** the **`Query` object** provided.                                                                                                                                         |
+|    Method    | Function                                                     |
+| :----------: | :----------------------------------------------------------- |
+| `initialize` | **Runs *any* code** which is **required** to **initialize** *the methods*, like creating the connection to the database, for example. This method is called *before* the `Client` logs in. |
+|    `find`    | **Returns** an **array of `Document`s**, *all* of which **match** the **`Query` object** provided. (**Empty array** if *none* of the `Document`s **match**) |
+|  `findOne`   | **Returns** *one* **`Document`** which **matches** the **`Query` object** provided. (**`undefined`** if *none* of the `Document`s **match**) |
+|   `upsert`   | **Replaces** *all* the **`Document`s** which **match** the **`Query` object** *with* the **`Document` provided**. If there were *no* replacements, then the **provided `Document`** is **inserted** in to the **database**. |
+|   `insert`   | **Inserts** the **provided `Document`** in to the **database**. |
+|   `delete`   | **Deletes** *any* **`Document`** which **matches** the **`Query` object** provided. |
 
 #### Example Extension
 
@@ -96,7 +95,7 @@ export class Database extends Abyssal.Database {
 		return Data.find(doc => matchQuery(query, doc));
 	}
 
-	public async update(query: Abyssal.Query, document: Abyssal.Document) {
+	public async upsert(query: Abyssal.Query, document: Abyssal.Document) {
 		let updated = false; // Set to true if atleast one document was replaced
         // Maps all the documents which matchQuery returns true to, with the provided
     	// document
@@ -510,7 +509,7 @@ export class Util extends Abyssal.Util {
     // If the database didn't have a state document, the update method will
     // insert the document, as it's suppose to do
 	public saveState() {
-		return this.database.update({
+		return this.database.upsert({
 			type: 'state',
 			session: this.session
 		}, this.state);

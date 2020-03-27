@@ -82,10 +82,10 @@ export class Util {
 
 	public async loadState() {
 		debug(`[ Tree: ${this.treeID}, Branch: ${this.branchID}, Session: ${this.session} ] Load state`);
-		this.state = (await this.database.findOne({
+		this.state = (await this.database.find({
 			type: 'state',
 			session: this.session
-		})) as State || {
+		}, { single: true })) as State || {
 			type: 'state',
 			session: this.session
 		};
@@ -96,7 +96,7 @@ export class Util {
 		return this.database.update({
 			type: 'state',
 			session: this.session
-		}, this.state);
+		}, this.state, { upsert: true });
 	}
 
 	public deleteState() {
