@@ -1,29 +1,51 @@
-import { Database } from './Database';
-import { Tree, TreeID } from './Tree';
-import { Util, Listener } from './Util';
-import DiscordJS from 'discord.js';
-import Uniqid from 'uniqid';
 import Debug from 'debug';
+import Uniqid from 'uniqid';
+import DiscordJS from 'discord.js';
+import { Database } from './Database';
+import { Util, Listener } from './Util';
+import { Trigger, TriggerID } from './Trigger';
 
 const debug = Debug('abyssal:client');
 
-export type Event = string | symbol;
 export type Args = any[];
+export type Event = string | symbol;
 
 export class Client extends DiscordJS.Client {
-	private readonly trees: Tree[] = [];
+	private events: string[] = [];
+	private readonly triggers: Trigger[] = [];
+
 	public constructor(public database: Database, clientOptions?: DiscordJS.ClientOptions) {
 		super(clientOptions);
 		this.on('ready', () => debug(`Logged in as ${this.user?.tag}`));
 	}
 
-	public addTree(tree: Tree) {
-		this.trees.push(tree);
+	public addTrigger(trigger: Trigger) {
+		this.triggers.push(trigger);
+		this.events = [];
+		this.triggers.forEach(trigger => {
+			trigger.listeners.forEach(listener => {
+				listener.events.forEach(event => {
+					if (!this.events.includes(event.toString())) {
+						this.events.push(event.toString());
+					}
+				});
+			});
+		});
 	}
 
-	public removeTree(id: TreeID) {
-		const idx = this.trees.findIndex(e => e.id === id);
-		this.trees.splice(idx, 1);
+	public removeTrigger(id: TriggerID) {
+		const idx = this.triggers.findIndex(e => e.id === id);
+		this.triggers.splice(idx, 1);
+		this.events = [];
+		this.triggers.forEach(trigger => {
+			trigger.listeners.forEach(listener => {
+				listener.events.forEach(event => {
+					if (!this.events.includes(event.toString())) {
+						this.events.push(event.toString());
+					}
+				});
+			});
+		});
 	}
 
 	public emit(event: Event, ...args: Args) {
@@ -34,34 +56,36 @@ export class Client extends DiscordJS.Client {
 
 	private async eventHandler(event: Event, args: Args) {
 		debug(`Event handler method executed`);
-
-		const eventList = await this.database.find({
-			type: 'listener',
-			event: event.toString()
-		}) as Listener[];
-
-		eventList.forEach(e => {
-			const tree = this.trees.find(trig => e.session.startsWith(trig.id));
-			tree?.execBranch(e.branch, new Util({
-				tree,
-				branchID: e.branch,
-				event,
-				args,
-				session: e.session,
-				database: this.database,
-				client: this
-			}));
-		});
-
-		this.trees.forEach(tree => tree.emit(event, new Util({
-			tree,
-			branchID: false,
+		if (this.events.includes(event.toString())) {
+			const eventList = await this.database.find({ type: 'listener' }) as Listener[];
+			eventList.forEach(e => {
+				const trigger = this.triggers.find(trigger => e.session.startsWith(trigger.id));
+				if (trigger) {
+					const listener = trigger.listeners.find(listener => listener.id === e.listenerID);
+					if (!listener?.events.includes(event)) return;
+					trigger.execListener(e.listenerID, new Util({
+						trigger,
+						event,
+						args,
+						session: e.session,
+						database: this.database,
+						client: this
+					}));
+				}
+			});
+		}
+		const utils: Util[] = this.triggers.map(trigger => new Util({
+			trigger,
 			event,
 			args,
-			session: Uniqid(`${tree.id}-`),
+			session: Uniqid(`${trigger.id}-`),
 			database: this.database,
 			client: this
-		})));
+		}));
+		const results = await Promise.all(this.triggers.map((trigger, i) => trigger.validate(utils[i])));
+		results.forEach((condition, i) => {
+			if (condition) this.triggers[i].execute(utils[i]);
+		});
 	}
 
 	public async login(token: string) {
