@@ -1,6 +1,6 @@
 import Debug from 'debug';
 import { Client, Event, Args } from './Client';
-import { Trigger, ListenerID } from './Trigger';
+import { Trigger, HandlerID } from './Trigger';
 import { Database, Query, Data } from './Database';
 
 const debug = Debug('abyssal:util');
@@ -14,7 +14,7 @@ export interface State {
 export interface Listener {
 	type: 'listener';
 	session: string;
-	listenerID: string;
+	handler: string;
 }
 
 export interface UtilConfig {
@@ -53,22 +53,22 @@ export class Util {
 		};
 	}
 
-	public getStateProperty(property: string) {
+	public getStateProperty(property: string): any {
 		debug(`Session: ${this.session} Get state property`, property);
 		return this.state[property];
 	}
 
-	public setStateProperty(property: string, value: any) {
+	public setStateProperty(property: string, value: any): void {
 		debug(`Session: ${this.session} Set state property`, property, value);
 		this.state[property] = value;
 	}
 
-	public deleteStateProperty(property: string) {
+	public deleteStateProperty(property: string): void {
 		debug(`Session: ${this.session} Delete state property`, property);
 		delete this.state[property];
 	}
 
-	public async loadState() {
+	public async loadState(): Promise<void> {
 		debug(`Session: ${this.session} Load state`);
 		this.state = (await this.database.findOne({
 			type: 'state',
@@ -79,7 +79,7 @@ export class Util {
 		};
 	}
 
-	public saveState() {
+	public saveState(): Promise<void> {
 		debug(`Session: ${this.session} Save state`);
 		return this.database.upsert({
 			type: 'state',
@@ -87,7 +87,7 @@ export class Util {
 		}, this.state);
 	}
 
-	public deleteState() {
+	public deleteState(): Promise<void> {
 		debug(`Session: ${this.session} Delete state`);
 		return this.database.delete({
 			type: 'state',
@@ -95,35 +95,35 @@ export class Util {
 		});
 	}
 
-	public async loadActiveListeners() {
-		debug(`Session: ${this.session} Load active listeners`);
+	public async loadAllListeners(): Promise<void> {
+		debug(`Session: ${this.session} Load All listeners`);
 		this.listeners = (await this.database.find({
 			type: 'listener',
 			session: this.session
 		})) as Listener[];
 	}
 
-	public async activateListener(listenerID: ListenerID) {
-		debug(`Session: ${this.session} Activate listener`, listenerID);
+	public addListener(handlerID: HandlerID): Promise<void> {
+		debug(`Session: ${this.session} Add listener`, handlerID);
 		const listener: Listener = {
 			type: 'listener',
 			session: this.session,
-			listenerID
+			handler: handlerID
 		};
 		this.listeners.push(listener);
 		return this.database.insert(listener);
 	}
 
-	public async deactivateListener(listenerID: ListenerID) {
-		debug(`Session: ${this.session} Remove listener`, listenerID);
-		const query: Query = { listenerID };
+	public removeListener(handlerID: HandlerID): Promise<void> {
+		debug(`Session: ${this.session} Remove listener`, handlerID);
+		const query: Query = { listenerID: handlerID };
 		this.listeners = this.listeners.filter(listener => !matchQuery(query, listener));
 		query.type = 'listener';
 		query.session = this.session;
 		return this.database.delete(query);
 	}
 
-	public async deactivateAllListeners() {
+	public removeAllListeners(): Promise<void> {
 		debug(`Session: ${this.session} Remove all listeners`);
 		this.listeners = [];
 		return this.database.delete({ type: 'listener', session: this.session });

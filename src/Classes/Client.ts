@@ -19,12 +19,12 @@ export class Client extends DiscordJS.Client {
 		this.on('ready', () => debug(`Logged in as ${this.user?.tag}`));
 	}
 
-	public addTrigger(trigger: Trigger) {
+	public addTrigger(trigger: Trigger): void {
 		this.triggers.push(trigger);
 		this.events = [];
 		this.triggers.forEach(trigger => {
-			trigger.listeners.forEach(listener => {
-				listener.events.forEach(event => {
+			trigger.handlers.forEach(handler => {
+				handler.events.forEach(event => {
 					if (!this.events.includes(event.toString())) {
 						this.events.push(event.toString());
 					}
@@ -33,13 +33,13 @@ export class Client extends DiscordJS.Client {
 		});
 	}
 
-	public removeTrigger(id: TriggerID) {
+	public removeTrigger(id: TriggerID): void {
 		const idx = this.triggers.findIndex(e => e.id === id);
 		this.triggers.splice(idx, 1);
 		this.events = [];
 		this.triggers.forEach(trigger => {
-			trigger.listeners.forEach(listener => {
-				listener.events.forEach(event => {
+			trigger.handlers.forEach(handler => {
+				handler.events.forEach(event => {
 					if (!this.events.includes(event.toString())) {
 						this.events.push(event.toString());
 					}
@@ -48,22 +48,22 @@ export class Client extends DiscordJS.Client {
 		});
 	}
 
-	public emit(event: Event, ...args: Args) {
+	public emit(event: Event, ...args: Args): boolean {
 		debug(`'${event.toString()}' event emitted`);
 		this.eventHandler(event, args);
 		return super.emit(event, ...args);
 	}
 
-	private async eventHandler(event: Event, args: Args) {
+	private async eventHandler(event: Event, args: Args): Promise<void> {
 		debug(`Event handler method executed`);
 		if (this.events.includes(event.toString())) {
 			const eventList = await this.database.find({ type: 'listener' }) as Listener[];
 			eventList.forEach(e => {
 				const trigger = this.triggers.find(trigger => e.session.startsWith(trigger.id));
 				if (trigger) {
-					const listener = trigger.listeners.find(listener => listener.id === e.listenerID);
-					if (!listener?.events.includes(event)) return;
-					trigger.execListener(e.listenerID, new Util({
+					const handler = trigger.handlers.find(handler => handler.id === e.handler);
+					if (!handler?.events.includes(event)) return;
+					trigger.execHandler(e.handler, new Util({
 						trigger,
 						event,
 						args,
@@ -88,7 +88,7 @@ export class Client extends DiscordJS.Client {
 		});
 	}
 
-	public async login(token: string) {
+	public async login(token: string): Promise<string> {
 		debug('Initializing database...');
 		await this.database.initialize();
 		debug('Database initialized');

@@ -4,50 +4,43 @@ import { Event } from './Client';
 
 const debug = Debug('abyssal:tree');
 
-export type BranchID = string;
 export type TriggerID = string;
-export type ListenerID = string;
-export type ListenerEvents = Event[];
+export type HandlerID = string;
+export type HandlerEvents = Event[];
 export type Action = (util: Util) => Promise<void>;
 export type Condition = (util: Util) => Promise<boolean>;
-export type BranchMethod = (util: Util) => Promise<void>;
-export type ListenerMethod = (util: Util) => Promise<void>;
+export type HandlerMethod = (util: Util) => Promise<void>;
 
-interface Branch {
-	id: BranchID;
-	method: BranchMethod;
-}
-
-interface Listener {
-	id: ListenerID;
-	events: ListenerEvents;
-	method: ListenerMethod;
+interface Handler {
+	id: HandlerID;
+	events: HandlerEvents;
+	method: HandlerMethod;
 }
 
 export class Trigger {
 	public validate: Condition = async () => true;
 	public execute: Action = async () => undefined;
-	public readonly listeners: Listener[] = [];
+	public readonly handlers: Handler[] = [];
 
 	// eslint-disable-next-line no-useless-constructor
 	public constructor(public id: TriggerID) { }
 
-	public condition(method: Condition) {
+	public condition(method: Condition): void {
 		this.validate = method;
 	}
 
-	public action(method: Action) {
+	public action(method: Action): void {
 		this.execute = method;
 	}
 
-	public listener(id: ListenerID, events: ListenerEvents, method: ListenerMethod) {
-		this.listeners.push({ id, events, method });
+	public handler(id: HandlerID, events: HandlerEvents, method: HandlerMethod): void {
+		this.handlers.push({ id, events, method });
 	}
 
-	public async execListener(id: ListenerID, util: Util) {
-		debug(`[ Tree: ${this.id} ] Execute Listener`, id);
-		const listener = this.listeners.find(listener => listener.id === id);
+	public async execHandler(id: HandlerID, util: Util): Promise<void> {
+		debug(`[ Trigger: ${this.id} ] Execute Handler`, id);
+		const listener = this.handlers.find(listener => listener.id === id);
 		if (listener) await listener.method(util);
-		else throw new Error(`Listener does not exist - ${id}`);
+		else throw new Error(`Handler does not exist - ${id}`);
 	}
 }

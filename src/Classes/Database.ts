@@ -31,7 +31,7 @@ export class Database {
 		return this.database.find(d => matchQuery(query, d));
 	}
 
-	public async upsert(query: Query, data: Data, options?: Options): Promise<any> {
+	public async upsert(query: Query, data: Data, options?: Options): Promise<void> {
 		debug('Upsert', query, data, options);
 		let updated = false;
 		this.database = this.database.map(d => {
@@ -44,12 +44,12 @@ export class Database {
 		if (!updated) this.database.push(data);
 	}
 
-	public async insert(data: Data, options?: Options): Promise<any> {
+	public async insert(data: Data, options?: Options): Promise<void> {
 		debug('Insert', data, options);
 		this.database.push(data);
 	}
 
-	public async delete(query: Query, options?: Options): Promise<any> {
+	public async delete(query: Query, options?: Options): Promise<void> {
 		debug('Delete', query, options);
 		this.database = this.database.filter(d => !matchQuery(query, d));
 	}
