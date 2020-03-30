@@ -12,6 +12,7 @@
     <a href="https://nodei.co/npm/abyssal/"><img src="https://nodei.co/npm/abyssal.png?downloads=true&stars=true" alt="npm installnfo" /></a>
   </p>
 </div>
+
 Abyssal is a tiny [Discord.js](https://discord.js.org/) framework, whose goal is to make your bot modular & elegant in nature. Abyssal divides a typical bot's functionality into simple flexible classes, which can be extended to add or change existing functionality. These classes come together to create a working Discord bot.
 
 The main feature Abyssal provides is the ability for it to resume the execution of a command, in case of an interruption (restart). Abyssal will continue the execution of the command, after the restart, from where it left off.
