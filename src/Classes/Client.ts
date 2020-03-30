@@ -14,7 +14,7 @@ export class Client extends DiscordJS.Client {
 	private events: string[] = [];
 	private readonly triggers: Trigger[] = [];
 
-	public constructor(public database: Database, clientOptions?: DiscordJS.ClientOptions) {
+	public constructor(private readonly database: Database, clientOptions?: DiscordJS.ClientOptions) {
 		super(clientOptions);
 		this.on('ready', () => debug(`Logged in as ${this.user?.tag}`));
 	}

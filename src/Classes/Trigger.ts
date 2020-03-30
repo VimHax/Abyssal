@@ -2,7 +2,7 @@ import Debug from 'debug';
 import { Util } from './Util';
 import { Event } from './Client';
 
-const debug = Debug('abyssal:tree');
+const debug = Debug('abyssal:trigger');
 
 export type TriggerID = string;
 export type HandlerID = string;
