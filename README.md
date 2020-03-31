@@ -60,7 +60,7 @@ The database, in the abstraction, comprises of `Data` objects. The `Data` object
 
 ```typescript
 interface Data {
-    [key: string]: any;
+	[key: string]: any;
 }
 ```
 
@@ -70,7 +70,7 @@ Queries return one or more `Data` objects which match the `Query` object provide
 
 ```typescript
 interface Query {
-    [key: string]: any;
+	[key: string]: any;
 }
 ```
 
@@ -130,14 +130,14 @@ interface Handler {
 }
 
 interface Trigger extends EventEmitter {
-    id: TriggerID;
-    execute: Action;
-    handlers: Handler[];
-    validate: Condition;
-    action: (method: Action) => void;
-    condition: (method: Condition) => void;
-    execHandler: (id: HandlerID, util: Util) => Promise<void>;
-    handler: (id: HandlerID, events: HandlerEvents, method: HandlerMethod) => void;
+	id: TriggerID;
+	execute: Action;
+	handlers: Handler[];
+	validate: Condition;
+	action: (method: Action) => void;
+	condition: (method: Condition) => void;
+	execHandler: (id: HandlerID, util: Util) => Promise<void>;
+	handler: (id: HandlerID, events: HandlerEvents, method: HandlerMethod) => void;
 }
 ```
 
@@ -330,22 +330,22 @@ type Event = string | symbol;
 
 interface Util {
 	args: Args;
-    event: Event;
-    state: State;
-    client: Client;
+    	event: Event;
+   	state: State;
+   	client: Client;
 	session: string;
 	database: Database;
-    listeners: Listener[];
-    loadState: () => Promise<void>;
-    saveState: () => Promise<void>;
-    deleteState: () => Promise<void>;
-    loadListeners: () => Promise<void>;
-    removeAllListeners: () => Promise<void>;
-    getStateProperty: (property: string) => void; 
-    deleteStateProperty: (property: string) => void;
-    addListener: (handlerID: string) => Promise<void>;
-    removeListener: (handlerID: string) => Promise<void>;
-    setStateProperty: (property: string, value: any) => void;
+    	listeners: Listener[];
+    	loadState: () => Promise<void>;
+    	saveState: () => Promise<void>;
+    	deleteState: () => Promise<void>;
+    	loadListeners: () => Promise<void>;
+    	removeAllListeners: () => Promise<void>;
+    	getStateProperty: (property: string) => void; 
+    	deleteStateProperty: (property: string) => void;
+    	addListener: (handlerID: string) => Promise<void>;
+    	removeListener: (handlerID: string) => Promise<void>;
+    	setStateProperty: (property: string, value: any) => void;
 }
 
 interface UtilConfig {
@@ -620,8 +620,8 @@ This class is a extension of the [`DiscordJS.Client`](https://discord.js.org/#/d
 
 ```typescript
 interface Client extends DiscordJS.Client {
-    addTrigger: (trigger: Trigger) => void;
-    removeTrigger: (id: TriggerID) => void;
+    	addTrigger: (trigger: Trigger) => void;
+    	removeTrigger: (id: TriggerID) => void;
 }
 ```
 
