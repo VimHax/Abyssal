@@ -17,6 +17,39 @@ Abyssal is a tiny [Discord.js](https://discord.js.org/) framework, whose goal is
 
 The main feature Abyssal provides is the ability for it to resume the execution of a command, in case of an interruption (restart). Abyssal will continue the execution of the command, after the restart, from where it left off.
 
+# Table of Contents
+
+- [Installation](#installation)
+- [Example Usage](#example-usage)
+- [Documentation](#documentation)
+  - [Database](#database---new-database)
+    - [Data](#data)
+    - [Queries](#queries)
+    - [Interface](#interface)
+    - [Functionality](#functionality)
+  - [Trigger](#trigger---new-triggerid-triggerid)
+    - [Interface](#interface-1)
+    - [Functionality](#functionality-1)
+    - [Example Usage](#example-usage-1)
+      - [Example 1 - Ping](#example-1---ping)
+      - [Example 2 - Join & Leave Messages](#example-2---join--leave-messages)
+      - [Example 3 - Add](#example-3---add)
+  - [Util](#util---new-utilconfig-utilconfig)
+    - [Session](#session)
+    - [State](#state)
+    - [Listeners & Handlers](#listeners--handlers)
+    - [Interface](#interface-2)
+    - [Functionality](#functionality-2)
+    - [Example Usage](#example-usage-2)
+      - [Example 1 - Generate Number](#example-1---generate-number)
+      - [Example 2 - React Message](#example-2---react-message)
+      - [Example 3 - Calculate](#example-3---calculate)
+  - [Client](#client---new-clientdatabase-database-clientoptions-clientoptions)
+    - [Interface](#interface-3)
+    - [Functionality](#functionality-3)
+    - [Example Usage](#example-usage-3)
+- [Debug Logs](#debug-logs)
+
 # Installation
 
 **[Node.js](https://nodejs.org/) 12.0.0 or newer is required, for [Discord.js](https://discord.js.org/) to run properly.**
@@ -156,7 +189,7 @@ interface Trigger extends EventEmitter {
 
 ### Example Usage
 
-#### Example 1
+#### Example 1 - Ping
 
 A `Trigger` which responds to `"ping"` with `"Pong!"`.
 
@@ -193,7 +226,7 @@ Ping.action(async util => {
 export default Ping;
 ```
 
-#### Example 2
+#### Example 2 - Join & Leave Messages
 
 A `Trigger` which sends join & leave messages to a channel.
 
@@ -234,7 +267,7 @@ JoinLeaveMsg.action(async util => {
 export default JoinLeaveMsg;
 ```
 
-#### Example 3
+#### Example 3 - Add
 
 A `Trigger` which adds 2 given numbers.
 
@@ -382,7 +415,7 @@ interface UtilConfig {
 
 ### Example Usage
 
-#### Example 1
+#### Example 1 - Generate Number
 
 A `Trigger` which generates a random number, between 0 & 100.
 
@@ -448,7 +481,7 @@ GenNumber.handler('showNumber', ['message'], async util => {
 export default GenNumber;
 ```
 
-#### Example 2
+#### Example 2 - React Message
 
 A `Trigger` which sends a message, whose description is the current reactions.
 
@@ -506,7 +539,7 @@ ReactMsg.handler('updateMessage', ['messageReactionAdd', 'messageReactionRemove'
 export default ReactMsg;
 ```
 
-#### Example 3
+#### Example 3 - Calculate
 
 A `Trigger` which can add, subtract, multiply or divide two numbers.
 
