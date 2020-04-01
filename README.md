@@ -64,7 +64,7 @@ interface Data {
 }
 ```
 
-#### Queries
+### Queries
 
 Queries return one or more `Data` objects which match the `Query` object provided. The `Query` object is defined by the following interface.
 
@@ -448,7 +448,7 @@ GenNumber.handler('showNumber', ['message'], async util => {
 export default GenNumber;
 ```
 
-##### Example 2
+#### Example 2
 
 A `Trigger` which sends a message, whose description is the current reactions.
 
@@ -506,7 +506,7 @@ ReactMsg.handler('updateMessage', ['messageReactionAdd', 'messageReactionRemove'
 export default ReactMsg;
 ```
 
-##### Example 3
+#### Example 3
 
 A `Trigger` which can add, subtract, multiply or divide two numbers.
 
