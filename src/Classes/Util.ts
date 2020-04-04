@@ -116,7 +116,7 @@ export class Util {
 
 	public removeListener(handlerID: HandlerID): Promise<void> {
 		debug(`Session: ${this.session} Remove listener`, handlerID);
-		const query: Query = { listenerID: handlerID };
+		const query: Query = { handler: handlerID };
 		this.listeners = this.listeners.filter(listener => !matchQuery(query, listener));
 		query.type = 'listener';
 		query.session = this.session;

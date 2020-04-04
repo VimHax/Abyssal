@@ -1,7 +1,7 @@
 <div align="center">
   <br />
   <p>
-    <img src="https://svgshare.com/i/JfS.svg" width="546" alt="logo" />
+    <img src="https://svgshare.com/i/Jkv.svg" width="546" alt="logo" />
   </p>
   <p>
     <a href="https://www.npmjs.com/package/abyssal"><img src="https://img.shields.io/npm/v/abyssal.svg?maxAge=3600&style=for-the-badge" alt="NPM version" /></a>

@@ -1,6 +1,6 @@
 {
 	"name": "abyssal",
-	"version": "0.1.0",
+	"version": "0.1.1",
 	"description": "A discord.js framework, serving the purpose of, making your discord bot modular in nature.",
 	"main": "./build/index.js",
 	"typings": "./build/index.d.ts",
